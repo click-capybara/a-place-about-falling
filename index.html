@@ -583,10 +583,10 @@
   /* ═══ landing ═══ */
   .landing[hidden], #page[hidden] { display: none; }
   .landing { padding-top: 34px; }
-  .ld-badge { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px;
-    background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); font-size: 13px; font-weight: 700; }
-  .ld-badge .tb-logo { width: 28px; height: 28px; border-radius: 8px; }
-  .ld-badge .tb-logo img { width: 20px; height: 20px; }
+  /* a little yellow sticker, slapped on a bit crooked */
+  .ld-badge { display: inline-block; padding: 7px 13px 6px; border-radius: 8px; background: var(--yellow); color: var(--char);
+    font-size: 12.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; transform: rotate(-3deg);
+    box-shadow: 0 3px 0 var(--yellow-deep); }
   .ld-title { margin: 22px 0 14px; font-size: clamp(42px, 12vw, 66px); }
   .ld-lead { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; }
   .ld-cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 0; }
@@ -682,7 +682,7 @@
 
 <!-- ═══ LANDING (shown when the link has no ?c=) ═══ -->
 <main class="wrap landing" id="landing" hidden>
-  <div class="ld-badge"><span class="tb-logo"><img src="favicon-32.png" alt="" width="24" height="24"></span>for people who fall for fun</div>
+  <div class="ld-badge">for people who fall for fun</div>
   <h1 class="ld-title">A Place About Falling</h1>
   <p class="ld-lead">Your own little bouldering page. Friends see when you climb, join a session with one tap, or pitch you a day. Free, no app, no account here.</p>
   <div class="ld-cta">
