@@ -680,7 +680,7 @@
   <p class="ld-lead">Your own little bouldering page. Friends see when you climb, join a session with one tap, or pitch you a day. Free, no app, no account here.</p>
   <div class="ld-cta">
     <a class="btn" href="setup.html">Get your own page</a>
-    <a class="btn ghost" id="showcaseBtn" href="?c=demo">See a demo</a>
+    <a class="btn ghost" id="showcaseBtn" href="https://mamfredm.github.io/bouldern/">See a live one</a>
   </div>
   <a class="ld-last" id="lastPage" href="#" hidden>← Back to <span id="lastName">your last</span> page</a>
 
@@ -1140,9 +1140,9 @@ const Ink = (() => {
   const ENDPOINT = /^[\w-]{20,}$/.test(CODE) ? 'https://script.google.com/macros/s/' + CODE + '/exec' : (CODE === 'demo' ? 'DEMO' : '');
   const NS = 'apaf:' + CODE + ':';            // device storage is kept per person
   const LATEST_BACKEND = 1;                   // Code.gs version this page expects
-  // ✏️ the real page the landing shows as example ("See a live one").
-  //    Empty = the made-up demo (?c=demo) instead.
-  const SHOWCASE_CODE = 'AKfycbxYmEHK80SiFBZSTsH2s30uwmH0407M8yxSrUmtIXg1AY042w79xByO1Z2VMX9faGq-';
+  // ✏️ the real page the landing shows as example ("See a live one"):
+  //    any full address. Empty = the made-up demo (?c=demo) instead.
+  const SHOWCASE_URL = 'https://mamfredm.github.io/bouldern/';
   const SHOWCASE_LABEL = 'See a live one';
 
   // your first name (empty = no name shown). photo: put e.g. me.jpg into
@@ -1239,8 +1239,9 @@ const Ink = (() => {
     document.documentElement.classList.add('is-landing');
     $('page').hidden = true; $('landing').hidden = false;
     let last = null; try { last = JSON.parse(localStorage.getItem('apaf:last') || 'null'); } catch (e) {}
-    if (SHOWCASE_CODE) { $('showcaseBtn').href = '?c=' + encodeURIComponent(SHOWCASE_CODE); $('showcaseBtn').textContent = SHOWCASE_LABEL; }
-    if (last && last.c && last.c !== 'demo' && last.c !== SHOWCASE_CODE) { $('lastPage').hidden = false; $('lastPage').href = '?c=' + encodeURIComponent(last.c); $('lastName').textContent = last.name ? last.name + '\u2019s' : 'your last'; }
+    if (SHOWCASE_URL) { $('showcaseBtn').href = SHOWCASE_URL; $('showcaseBtn').textContent = SHOWCASE_LABEL; }
+    else { $('showcaseBtn').href = '?c=demo'; $('showcaseBtn').textContent = 'See a demo'; }
+    if (last && last.c && last.c !== 'demo') { $('lastPage').hidden = false; $('lastPage').href = '?c=' + encodeURIComponent(last.c); $('lastName').textContent = last.name ? last.name + '\u2019s' : 'your last'; }
     return;
   }
   document.documentElement.classList.add('awaiting');   // hide the header until the person's texts are in
