@@ -106,8 +106,7 @@ var T = {
     noApi: 'Hinweis: Der Google-Kalender-Dienst ist in diesem Skript nicht aktiv, ganztägige Termine werden dann nicht erkannt. Sag der Person Bescheid, von der du die Vorlage hast.',
     s4: 'Deine Hallen', s4Lead: 'Diese Hallen kann man auf deiner Seite auswählen.',
     addGym: 'Eigene Halle hinzufügen', gymName: 'Name', gymAddr: 'Adresse', gymCity: 'Stadt', add: 'Hinzufügen', own: 'Eigene',
-    s5: 'Extras', s5Lead: 'Alles hier ist freiwillig.',
-    hangout: 'Link zu deiner Hangout-Einladung', hangoutHint: 'Falls du auch eine Einladung für Essen/Drinks/Sport hast. Sonst leer lassen.',
+    s5: 'Fast fertig', s5Lead: 'Wohin sollen Benachrichtigungen gehen?',
     notify: 'Benachrichtigungen an', notifyHint: 'Hierhin kommen Mails, wenn jemand mitkommt oder dir einen Tag vorschlägt.',
     saving: 'Speichere… (beim ersten Mal ca. 10 Sekunden)',
     s6: 'Seite veröffentlichen', s6Lead: 'Jetzt noch einmal auf „Bereitstellen" klicken. Das ist der einzige Schritt, den Google nicht automatisch erlaubt.',
@@ -149,8 +148,7 @@ var T = {
     noApi: 'Note: the Google Calendar service isn\'t enabled in this script, so all-day events won\'t be detected. Tell whoever gave you the template.',
     s4: 'Your gyms', s4Lead: 'People can pick these gyms on your page.',
     addGym: 'Add your own gym', gymName: 'Name', gymAddr: 'Address', gymCity: 'City', add: 'Add', own: 'Your own',
-    s5: 'Extras', s5Lead: 'Everything here is optional.',
-    hangout: 'Link to your hangout invite', hangoutHint: 'If you also have an invite for food/drinks/sport. Otherwise leave empty.',
+    s5: 'Almost done', s5Lead: 'Where should notifications go?',
     notify: 'Send notifications to', notifyHint: 'Emails about people joining or pitching you a day go here.',
     saving: 'Saving… (about 10 seconds the first time)',
     s6: 'Publish your page', s6Lead: 'One more click on "Deploy". It\'s the only step Google won\'t let a script do by itself.',
@@ -397,7 +395,7 @@ run('getSetupState', [], function (state) {
     calendarId: sv.calendarId || '',
     availabilityCalendarIds: sv.availabilityCalendarIds || ['primary'],
     gyms: sv.gyms && sv.gyms.length ? sv.gyms : [],
-    hangoutUrl: sv.hangoutUrl || '', notifyEmail: sv.notifyEmail || S.email
+    notifyEmail: sv.notifyEmail || S.email
   };
   if (START === 'links' && S.deploymentId) step = 7;
   else if (S.hasSettings && !S.deploymentId) step = 6;
@@ -567,7 +565,6 @@ function stepGyms(main) {
 
 function stepExtras(main) {
   head(main, 's5', 's5Lead');
-  field(main, 'hangoutUrl', 'hangout', 'url', { hint: 'hangoutHint', optional: true });
   field(main, 'notifyEmail', 'notify', 'email', { hint: 'notifyHint' });
   main.appendChild(h('p', { class: 'hint', style: 'margin-top:16px' }, '🔒 ' + escH(t('privacyNote'))));
   var e = errBox(main);

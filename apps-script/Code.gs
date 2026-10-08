@@ -26,7 +26,7 @@
 /* ───────────────────────── fixed settings (same for everyone) ───────────────────────── */
 
 // ✏️ (owner only) where the shared page lives. Every copy builds its links from this.
-var PAGE_BASE = 'https://mamfredm.github.io/a-place-about-falling/';
+var PAGE_BASE = 'https://click-capybara.github.io/a-place-about-falling/';
 
 // bump when this file changes in a way the page needs to know about
 var BACKEND_VERSION = 1;
@@ -83,7 +83,6 @@ function C() {
     calendarId: s.calendarId || '',
     availabilityCalendarIds: (s.availabilityCalendarIds && s.availabilityCalendarIds.length) ? s.availabilityCalendarIds : ['primary'],
     gyms: (s.gyms && s.gyms.length) ? s.gyms : DEFAULT_GYMS,
-    hangoutUrl: s.hangoutUrl || '',
     spontaneousTitle: s.spontaneousTitle || 'Spontaneous session',
     adminKey: p.getProperty('ADMIN_KEY') || '',
     hostEmail: s.notifyEmail || Session.getEffectiveUser().getEmail(),
@@ -263,7 +262,7 @@ function feed() {
   return {
     v: BACKEND_VERSION,
     profile: { name: c.hostName === 'me' ? '' : c.hostName, title: c.title, intro: c.intro, gyms: c.gyms,
-               hangoutUrl: c.hangoutUrl, contact: { name: c.contactName, email: c.contactEmail } },
+               contact: { name: c.contactName, email: c.contactEmail } },
     now: liveNow(list), sessions: list, host: c.hostName, availability: availability()
   };
 }
@@ -824,7 +823,6 @@ function saveSettings(s) {
     calendarId: clean1(s.calendarId, 200),
     availabilityCalendarIds: (s.availabilityCalendarIds || []).map(function (x) { return clean1(x, 200); }).filter(String).slice(0, 10),
     gyms: gyms,
-    hangoutUrl: /^https:\/\//.test(s.hangoutUrl || '') ? clean1(s.hangoutUrl, 300) : '',
     notifyEmail: validEmail(String(s.notifyEmail || '')) ? clean1(s.notifyEmail, 200) : ''
   };
   if (!out.hostName) throw new Error('name');

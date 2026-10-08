@@ -629,7 +629,6 @@
     <a href="#pitch" data-page><span class="mi-ico">✋</span><span class="mi-txt"><b>Pitch me a session</b><small>Your gym, your day</small></span></a>
     <a href="#ping" data-page><span class="mi-ico">🔔</span><span class="mi-txt"><b>Ping me</b><small>Email when there's a new session</small></span></a>
     <button type="button" class="mi" id="menuQr"><span class="mi-ico">📱</span><span class="mi-txt"><b>QR code</b><small>Let someone at the gym scan it</small></span></button>
-    <a href="#" id="menuHangout" target="_self"><span class="mi-ico">🍻</span><span class="mi-txt"><b>Hangout invite</b><small>Food, drinks or sport instead</small></span><span class="mi-go">↗</span></a>
 
     <div id="menuAdmin" hidden>
       <div class="menu-group">Only you see this</div>
@@ -651,7 +650,6 @@
   <div class="sheet-head"><h2 id="qrSheetTitle">Scan &amp; join</h2><button type="button" class="sheet-x" data-close aria-label="Close">×</button></div>
   <div class="qr-switch" id="qrSwitch" role="group" aria-label="Which page">
     <button type="button" data-qr="climb" aria-pressed="true">🧗 Sessions</button>
-    <button type="button" data-qr="hangout" aria-pressed="false">🍻 Hangout</button>
   </div>
   <div class="qr-ticket">
     <div class="qr-kicker" id="qrKicker">point your camera here</div>
@@ -815,11 +813,6 @@
       <button class="btn" id="notifyBtn">Ping me</button>
     </div>
     <div class="err" id="notifyErr"></div>
-    <a class="other-invite" id="otherInvite" href="#" hidden>
-      <span class="oi-emoji" aria-hidden="true">🍻</span>
-      <span><b>Allergic to chalk?</b><small>There's a version without the falling part: food, drinks or sport.</small></span>
-      <span class="arrow" aria-hidden="true">→</span>
-    </a>
     <p class="privacy" id="privacy">Only first names on here, emails stay with me, and every email has an exit. No hidden grades.</p>
   </section>
 
@@ -1266,20 +1259,7 @@ const Ink = (() => {
   const findGym = name => allGyms.find(g => g.name === name);
   const mapsUrl = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
 
-  function setupOtherInvite() {
-    $('otherInvite').hidden = !FRIENDS_INVITE_URL;
-    if (!FRIENDS_INVITE_URL || $('otherInvite')._wired) return;
-    $('otherInvite')._wired = true;
-    $('otherInvite').href = FRIENDS_INVITE_URL;
-    Ink.attach($('otherInvite'), 'splash');
-    // let the splash finish before leaving (a tap on a phone is over instantly)
-    $('otherInvite').addEventListener('click', e => {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-      e.preventDefault();
-      const href = $('otherInvite').href;
-      setTimeout(() => { location.href = href; }, Ink.wait($('otherInvite')));
-    });
-  }
+  function setupOtherInvite() {}            // (hangout card removed in the shared version)
   setupOtherInvite();
 
   /* ---------- top ---------- */
@@ -1306,7 +1286,6 @@ const Ink = (() => {
     if (p.title) TEXT.title = p.title;
     TEXT.intro = p.intro || '';
     HOST.name = p.name || '';
-    FRIENDS_INVITE_URL = /^https:\/\//.test(p.hangoutUrl || '') ? p.hangoutUrl : '';
     if (p.gyms && p.gyms.length) {
       GYMS = p.gyms; allGyms = GYMS.flatMap(g => g.gyms);
       [['askGym', true], ['hostGym', false]].forEach(([id, ph]) => {
@@ -1346,7 +1325,7 @@ const Ink = (() => {
     return {
       v: LATEST_BACKEND,
       profile: { name: 'Max', title: 'Where my skin goes to die', intro: 'I\'m at the wall most days anyway. Bring shoes, skin and questionable beta.',
-                 gyms: GYMS, hangoutUrl: 'https://mamfredm.github.io/hangout/', contact: { name: 'Max Mustermann', email: 'max@example.com' } },
+                 gyms: GYMS, contact: { name: 'Max Mustermann', email: 'max@example.com' } },
       now: { gym: 'Superblock', location: sb, until: Date.now() + 100 * 60000 },
       sessions: [
         { id: 'd1', start: day(nextDow(1), 19), end: day(nextDow(1), 21, 30), gym: 'Superblock', location: sb, label: 'Monday crew', going: ['Tom', 'Lisa', 'Jan'] },
@@ -2468,7 +2447,7 @@ const QR = (() => {
   const CODE = new URLSearchParams(location.search).get('c') || '';
   const PAGE_URL = location.origin + location.pathname.replace(/[^/]*$/, '') + '?c=' + encodeURIComponent(CODE);
   const profile = () => window.APAF_PROFILE || {};
-  const HANGOUT_URL = () => /^https:\/\//.test(profile().hangoutUrl || '') ? profile().hangoutUrl : '';
+  const HANGOUT_URL = () => '';               // (no hangout link in the shared version)
 
   /* ---------- top bar: border + name appear once you scroll ---------- */
   const bar = $('topbar');
@@ -2518,8 +2497,6 @@ const QR = (() => {
   /* ---------- menu ---------- */
   $('tbMenu').addEventListener('click', e => show($('menu'), e.currentTarget));
   const syncProfile = () => {
-    $('menuHangout').hidden = !HANGOUT_URL();
-    $('menuHangout').href = HANGOUT_URL() || '#';
     $('qrSwitch').hidden = !HANGOUT_URL();
     if (!isDash) $('tbName').textContent = profile().name ? profile().name + '\u2019s wall' : 'A Place About Falling';
   };
@@ -2537,7 +2514,6 @@ const QR = (() => {
   /* ---------- QR sheet ---------- */
   const QR_PAGES = {
     climb:   () => ({ url: PAGE_URL, kicker: 'point your camera here', title: profile().name ? 'Climb with ' + profile().name : 'A Place About Falling' }),
-    hangout: () => ({ url: HANGOUT_URL(), kicker: 'not into falling?', title: 'Hangout invite' })
   };
   let qrWhich = 'climb';
   function drawQr() {
