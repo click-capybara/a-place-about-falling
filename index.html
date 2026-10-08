@@ -1235,11 +1235,11 @@ const Ink = (() => {
     document.documentElement.classList.add('is-landing');
     $('page').hidden = true; $('landing').hidden = false;
     let last = null; try { last = JSON.parse(localStorage.getItem('apaf:last') || 'null'); } catch (e) {}
-    if (last && last.c) { $('lastPage').hidden = false; $('lastPage').href = '?c=' + encodeURIComponent(last.c); $('lastName').textContent = last.name ? last.name + '\u2019s' : 'your last'; }
+    if (last && last.c && last.c !== 'demo') { $('lastPage').hidden = false; $('lastPage').href = '?c=' + encodeURIComponent(last.c); $('lastName').textContent = last.name ? last.name + '\u2019s' : 'your last'; }
     return;
   }
   document.documentElement.classList.add('awaiting');   // hide the header until the person's texts are in
-  try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: '' })); } catch (e) {}
+  if (!DEMO) { try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: '' })); } catch (e) {} }
   document.querySelectorAll('.privacy-link').forEach(a => { a.href = 'privacy.html?c=' + encodeURIComponent(CODE); });
   const params = new URLSearchParams(location.search);
   // Admin key: from the link (?admin=…) — and remembered on this device, so
@@ -1296,7 +1296,7 @@ const Ink = (() => {
       });
     }
     drawTop(); setupOtherInvite();
-    try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: HOST.name })); } catch (e) {}
+    if (!DEMO) { try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: HOST.name })); } catch (e) {} }
     document.dispatchEvent(new CustomEvent('apaf:profile', { detail: p }));
   }
   if (HOST.photo) {
