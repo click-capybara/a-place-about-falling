@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get your own page · A Place About Falling</title>
+<meta name="description" content="Your own bouldering page in about 5 minutes. No coding.">
+<meta name="theme-color" content="#1c1b19">
+<link rel="preload" href="bungee.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  @font-face { font-family: 'Bungee'; src: url('bungee.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  :root { --char: #1c1b19; --char-2: #262420; --char-3: #36332d; --line: #3f3b34; --yellow: #fcba01; --yellow-deep: #b98700;
+    --cream: #fff8e6; --muted: #b4ad9f; --dim: #8b8579; --sans: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--char); color: var(--cream); font-family: var(--sans); -webkit-tap-highlight-color: transparent; }
+  body { background-image: radial-gradient(rgba(252, 186, 1, 0.07) 1.3px, transparent 1.5px); background-size: 24px 24px; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 24px 20px 80px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 30px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--cream); text-decoration: none; font-family: 'Bungee', var(--sans); font-size: 14px; }
+  .logo { width: 34px; height: 34px; border-radius: 10px; background: var(--yellow); display: grid; place-items: center; transform: rotate(-4deg); }
+  .logo img { width: 24px; height: 24px; }
+  .lang { display: flex; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .lang button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 800; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--yellow); color: var(--char); }
+  h1 { font-family: 'Bungee', var(--sans); font-weight: 400; font-size: clamp(34px, 9.5vw, 54px); line-height: 1; margin: 0 0 14px; }
+  h2 { font-family: 'Bungee', var(--sans); font-weight: 400; font-size: 20px; line-height: 1.15; margin: 0 0 8px; }
+  .lead { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 0; }
+  p, li { line-height: 1.55; }
+  .need { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+  .need li { padding: 8px 12px; border-radius: 999px; background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); font-size: 14px; font-weight: 700; }
+  .warn { margin: 18px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(252, 186, 1, 0.12); color: var(--cream); font-size: 14px; line-height: 1.5; }
+  .warn b { color: var(--yellow); }
+  .step { position: relative; margin-top: 34px; padding-left: 52px; }
+  .step .n { position: absolute; left: 0; top: -2px; width: 38px; height: 38px; border-radius: 12px; background: var(--yellow); color: var(--char);
+    display: grid; place-items: center; font-family: 'Bungee', var(--sans); font-size: 18px; transform: rotate(-4deg); }
+  .step p { margin: 0 0 10px; color: #e4ddcd; font-size: 15px; }
+  .step .time { color: var(--dim); font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--yellow); color: var(--char); font-weight: 800; font-size: 16px;
+    padding: 14px 20px; border-radius: 12px; box-shadow: 0 4px 0 var(--yellow-deep); text-decoration: none; border: 0; cursor: pointer; font-family: inherit; }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--yellow-deep); }
+  .btn.off { background: var(--char-3); color: var(--muted); box-shadow: none; cursor: default; }
+  /* little drawings of what they'll see (not screenshots) */
+  .mock { margin: 12px 0 4px; border-radius: 14px; background: #fff; color: #202124; padding: 14px 16px; font: 14px/1.45 Arial, Helvetica, sans-serif;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); }
+  .mock .bar { display: flex; gap: 16px; font-size: 13px; color: #444; padding-bottom: 10px; border-bottom: 1px solid #e3e3e3; margin-bottom: 10px; flex-wrap: wrap; }
+  .mock .bar .hl { background: #fde293; border-radius: 4px; padding: 0 5px; font-weight: 700; color: #202124; }
+  .mock .drop { margin-left: auto; width: max-content; min-width: 210px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); padding: 6px 0; font-size: 13px; }
+  .mock .drop div { padding: 6px 14px; }
+  .mock .drop .hl { background: #fde293; font-weight: 700; }
+  .mock .t { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .mock .s { color: #5f6368; font-size: 13px; }
+  .mock .lnk { color: #1a73e8; font-weight: 700; font-size: 13px; }
+  .mock .lnk.hl { background: #fde293; border-radius: 4px; padding: 0 4px; }
+  .mock .row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+  .mock .row b { background: #fde293; border-radius: 4px; padding: 0 5px; }
+  .mock .blue { display: inline-block; margin-top: 10px; background: #1a73e8; color: #fff; border-radius: 6px; padding: 7px 14px; font-weight: 700; font-size: 13px; }
+  .cap { color: var(--dim); font-size: 12.5px; margin: 6px 0 0; }
+  .card { margin-top: 40px; padding: 20px; border-radius: 18px; background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .card ul { margin: 8px 0 0; padding-left: 20px; color: #e4ddcd; }
+  .card li { margin: 6px 0; }
+  details { margin-top: 10px; border-radius: 14px; background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); }
+  summary { cursor: pointer; padding: 14px 16px; font-weight: 800; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+  summary::after { content: '+'; color: var(--yellow); font-size: 20px; line-height: 1; }
+  details[open] summary::after { content: '–'; }
+  details p { margin: 0; padding: 0 16px 16px; color: #e4ddcd; font-size: 14.5px; }
+  .faq { margin-top: 40px; }
+  footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--dim); font-size: 13px; }
+  footer a { color: var(--muted); font-weight: 700; text-decoration: none; }
+  [data-l] { display: none !important; }
+  html[lang="de"] [data-l="de"], html[lang="en"] [data-l="en"] { display: revert !important; }
+  code { background: var(--char-3); padding: 1px 6px; border-radius: 6px; font-size: 0.92em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="./"><span class="logo"><img src="favicon-32.png" alt="" width="24" height="24"></span>A Place About Falling</a>
+    <div class="lang" role="group" aria-label="Sprache / Language">
+      <button type="button" data-set="de" aria-pressed="true">DE</button>
+      <button type="button" data-set="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <h1><span data-l="de">Deine eigene Seite</span><span data-l="en">Your own page</span></h1>
+  <p class="lead" data-l="de">In etwa 5 Minuten. Ohne Programmieren, ohne Konto bei uns. Alles bleibt in deinem Google-Konto.</p>
+  <p class="lead" data-l="en">In about 5 minutes. No coding, no account here. Everything stays in your Google account.</p>
+  <ul class="need">
+    <li>✅ <span data-l="de">Ein Google-Konto (Gmail)</span><span data-l="en">A Google account (Gmail)</span></li>
+    <li>💻 <span data-l="de">Ein Computer</span><span data-l="en">A computer</span></li>
+    <li>⏱ <span data-l="de">5 Minuten</span><span data-l="en">5 minutes</span></li>
+  </ul>
+  <p class="warn" data-l="de"><b>Wichtig:</b> Die Einrichtung geht nur am Computer im Browser. In der Google-Sheets-App am Handy fehlt das Menü. Später nutzt du alles ganz normal am Handy.</p>
+  <p class="warn" data-l="en"><b>Important:</b> setup only works on a computer, in the browser. The Google Sheets phone app doesn't show the menu. Afterwards you use everything on your phone as usual.</p>
+
+  <!-- 1 -->
+  <section class="step">
+    <span class="n">1</span>
+    <h2><span data-l="de">Vorlage kopieren</span><span data-l="en">Copy the template</span></h2>
+    <p class="time">⏱ 30 s</p>
+    <p data-l="de">Klick auf den Button und dann auf <b>„Kopie erstellen"</b>. Google weist darauf hin, dass ein Skript mitkopiert wird. Genau das soll so sein.</p>
+    <p data-l="en">Tap the button, then <b>"Make a copy"</b>. Google mentions that a script gets copied too. That's exactly the point.</p>
+    <a class="btn" id="copyBtn" href="#" target="_blank" rel="noopener">📄 <span data-l="de">Google Sheet kopieren</span><span data-l="en">Copy the Google Sheet</span></a>
+    <p class="cap" id="copyMissing" hidden><span data-l="de">Der Kopier-Link ist hier noch nicht eingetragen. Frag die Person, die dir diese Seite geschickt hat.</span><span data-l="en">The copy link isn't filled in here yet. Ask whoever sent you this page.</span></p>
+  </section>
+
+  <!-- 2 -->
+  <section class="step">
+    <span class="n">2</span>
+    <h2><span data-l="de">Menü öffnen</span><span data-l="en">Open the menu</span></h2>
+    <p class="time">⏱ 10 s</p>
+    <p data-l="de">In deiner Kopie erscheint nach ein paar Sekunden oben ein neues Menü. Klick auf <b>🧗 A Place About Falling → Einrichten / Set up</b>.</p>
+    <p data-l="en">After a few seconds a new menu appears at the top of your copy. Click <b>🧗 A Place About Falling → Einrichten / Set up</b>.</p>
+    <div class="mock" aria-hidden="true">
+      <div class="bar"><span data-l="de">Datei</span><span data-l="en">File</span><span data-l="de">Bearbeiten</span><span data-l="en">Edit</span><span data-l="de">Erweiterungen</span><span data-l="en">Extensions</span><span class="hl">🧗 A Place About Falling</span></div>
+      <div class="drop"><div class="hl">Einrichten / Set up</div><div>Meine Links / My links</div></div>
+    </div>
+    <p class="cap"><span data-l="de">Kein Menü da? Seite einmal neu laden.</span><span data-l="en">No menu? Reload the page once.</span></p>
+  </section>
+
+  <!-- 3 -->
+  <section class="step">
+    <span class="n">3</span>
+    <h2><span data-l="de">Einmal erlauben</span><span data-l="en">Allow it once</span></h2>
+    <p class="time">⏱ 30 s</p>
+    <p data-l="de">Google fragt, ob dein Skript an deinen Kalender und deine Tabelle darf. Weil es <b>dein eigenes</b> Skript ist und nicht aus einem App-Store, steht dort „Google hat diese App nicht überprüft". Das ist normal:</p>
+    <p data-l="en">Google asks whether your script may use your calendar and sheet. Because it's <b>your own</b> script and not from an app store, it says "Google hasn't verified this app". That's normal:</p>
+    <div class="mock" aria-hidden="true">
+      <div class="t" data-l="de">Google hat diese App nicht überprüft</div><div class="t" data-l="en">Google hasn't verified this app</div>
+      <div class="s" data-l="de">Die App fordert Zugriff auf vertrauliche Daten in deinem Google-Konto an…</div><div class="s" data-l="en">The app is requesting access to sensitive info in your Google Account…</div>
+      <p style="margin:10px 0 0"><span class="lnk hl" data-l="de">① Erweitert</span><span class="lnk hl" data-l="en">① Advanced</span> &nbsp;→&nbsp; <span class="lnk hl" data-l="de">② „A Place About Falling" öffnen (unsicher)</span><span class="lnk hl" data-l="en">② Go to "A Place About Falling" (unsafe)</span> &nbsp;→&nbsp; <span class="lnk hl" data-l="de">③ Zulassen</span><span class="lnk hl" data-l="en">③ Allow</span></p>
+    </div>
+    <p class="cap"><span data-l="de">„Unsicher" heißt hier nur: nicht von Google geprüft. Das Skript läuft ausschließlich in deinem Konto.</span><span data-l="en">"Unsafe" only means: not reviewed by Google. The script only runs inside your own account.</span></p>
+  </section>
+
+  <!-- 4 -->
+  <section class="step">
+    <span class="n">4</span>
+    <h2><span data-l="de">Fragen beantworten</span><span data-l="en">Answer a few questions</span></h2>
+    <p class="time">⏱ 2–3 min</p>
+    <p data-l="de">Rechts öffnet sich eine Leiste: Name, Überschrift, welcher Kalender, welche Hallen. Für die Sessions kannst du dort mit einem Klick einen neuen Kalender „Bouldern" anlegen.</p>
+    <p data-l="en">A panel opens on the right: name, headline, which calendar, which gyms. You can create a new "Bouldering" calendar for your sessions there with one click.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="step">
+    <span class="n">5</span>
+    <h2><span data-l="de">Veröffentlichen</span><span data-l="en">Publish</span></h2>
+    <p class="time">⏱ 1 min</p>
+    <p data-l="de">Der einzige Schritt, den Google nicht automatisch erlaubt. Die Leiste zeigt dir jeden Klick und hat einen Button, der Apps Script direkt öffnet. Dort: <b>Bereitstellen → Neue Bereitstellung → Web-App</b>, dann prüfen:</p>
+    <p data-l="en">The only step Google won't let a script do on its own. The panel shows every click and has a button that opens Apps Script for you. There: <b>Deploy → New deployment → Web app</b>, then check:</p>
+    <div class="mock" aria-hidden="true">
+      <div class="row"><span data-l="de">Ausführen als</span><span data-l="en">Execute as</span><b data-l="de">Ich</b><b data-l="en">Me</b></div>
+      <div class="row"><span data-l="de">Wer hat Zugriff</span><span data-l="en">Who has access</span><b data-l="de">Jeder</b><b data-l="en">Anyone</b></div>
+      <span class="blue" data-l="de">Bereitstellen</span><span class="blue" data-l="en">Deploy</span>
+    </div>
+    <p data-l="de" style="margin-top:12px">Danach die <b>Web-App-URL</b> kopieren und in die Leiste einfügen. Die prüft sofort, ob alles stimmt.</p>
+    <p data-l="en" style="margin-top:12px">Then copy the <b>Web app URL</b> and paste it into the panel. It checks right away that everything works.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="step">
+    <span class="n">6</span>
+    <h2><span data-l="de">Fertig, teilen!</span><span data-l="en">Done, share it!</span></h2>
+    <p data-l="de">Du bekommst deinen <b>öffentlichen Link</b> mit QR-Code und deinen <b>Admin-Link</b>. Mit einem Klick schickt dir die Leiste beide per Mail. Öffne den Admin-Link einmal am Handy: Danach erkennt dich die Seite dort, und du kannst in der Halle mit einem Tipp einchecken.</p>
+    <p data-l="en">You get your <b>public link</b> with a QR code and your <b>admin link</b>. One click and the panel emails you both. Open the admin link on your phone once: from then on the page recognises you there, and you can check in at the gym with one tap.</p>
+  </section>
+
+  <div class="card">
+    <h2>📅 <span data-l="de">Sessions eintragen</span><span data-l="en">Adding sessions</span></h2>
+    <ul data-l="de">
+      <li>Einfach einen Termin in deinen Boulder-Kalender eintragen, auch am Handy.</li>
+      <li><b>Ort</b> = die Halle, z. B. <code>Superblock, Fichtenstraße 53, Düsseldorf</code>. Der Teil vor dem ersten Komma ist der Hallenname.</li>
+      <li><b>Titel</b> = kleine Notiz auf der Karte, z. B. <code>Montagsgruppe</code>.</li>
+      <li>Wiederholende Termine klappen. Beschreibung und Gäste sind nie öffentlich.</li>
+    </ul>
+    <ul data-l="en">
+      <li>Just add an event to your bouldering calendar, from your phone too.</li>
+      <li><b>Location</b> = the gym, e.g. <code>Superblock, Fichtenstraße 53, Düsseldorf</code>. The part before the first comma is the gym name.</li>
+      <li><b>Title</b> = a small note on the card, e.g. <code>Monday crew</code>.</li>
+      <li>Repeating events work. Description and guests are never public.</li>
+    </ul>
+  </div>
+
+  <div class="faq">
+    <h2>FAQ</h2>
+    <details><summary><span data-l="de">Kostet das was?</span><span data-l="en">Does it cost anything?</span></summary>
+      <p data-l="de">Nein. Es läuft in deinem kostenlosen Google-Konto. Google erlaubt Skripten ca. 100 Mails pro Tag, das reicht für Einladungen und die Ping-Liste locker.</p>
+      <p data-l="en">No. It runs in your free Google account. Google lets scripts send about 100 emails a day, plenty for invites and the ping list.</p></details>
+    <details><summary><span data-l="de">Wer sieht meine Daten?</span><span data-l="en">Who sees my data?</span></summary>
+      <p data-l="de">Nur du. Anmeldungen, Vorschläge und die Ping-Liste landen als Tabs in deiner Tabelle. Die gemeinsame Seite zeigt sie nur an, sie speichert nichts. Aus deinen anderen Kalendern sieht niemand Titel oder Orte, nur „morgens/mittags/abends beschäftigt".</p>
+      <p data-l="en">Only you. Sign-ups, pitches and the ping list land as tabs in your sheet. The shared page only displays them, it stores nothing. From your other calendars nobody sees titles or places, only "busy in the morning/afternoon/evening".</p></details>
+    <details><summary><span data-l="de">Ich muss etwas ändern.</span><span data-l="en">I need to change something.</span></summary>
+      <p data-l="de">Tabelle öffnen → Menü 🧗 → „Einrichten". Alles lässt sich jederzeit ändern. Dein Link bleibt gleich.</p>
+      <p data-l="en">Open your sheet → menu 🧗 → "Set up". You can change anything anytime. Your link stays the same.</p></details>
+    <details><summary><span data-l="de">Mein Admin-Link ist in falsche Hände geraten.</span><span data-l="en">My admin link got out.</span></summary>
+      <p data-l="de">Menü 🧗 → „Meine Links" → „Neues Admin-Wort". Der alte Link funktioniert dann sofort nicht mehr.</p>
+      <p data-l="en">Menu 🧗 → "My links" → "New admin word". The old link stops working immediately.</p></details>
+    <details><summary><span data-l="de">Wie lösche ich alles?</span><span data-l="en">How do I delete everything?</span></summary>
+      <p data-l="de">Deine Tabelle löschen (damit sind Skript und Daten weg) und, falls angelegt, den Boulder-Kalender. Fertig, die Seite unter deinem Link ist dann leer.</p>
+      <p data-l="en">Delete your sheet (that removes the script and the data) and, if you made one, the bouldering calendar. Done, the page behind your link is then empty.</p></details>
+  </div>
+
+  <footer>
+    <span>Powered by <a href="https://click-capybara.com" target="_blank" rel="noopener">Click-Capybara</a></span>
+    <span><a href="privacy.html">Datenschutz</a> · <a href="rechtliches.html#impressum">Impressum</a></span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // ✏️ the "make a copy" link of the master sheet:
+  //    https://docs.google.com/spreadsheets/d/<SHEET-ID>/copy
+  var COPY_URL = 'https://docs.google.com/spreadsheets/d/PASTE_MASTER_SHEET_ID/copy';
+
+  var html = document.documentElement;
+  function setLang(l) {
+    html.lang = l;
+    document.querySelectorAll('[data-set]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+    try { localStorage.setItem('apaf:lang', l); } catch (e) {}
+  }
+  var saved = null; try { saved = localStorage.getItem('apaf:lang'); } catch (e) {}
+  setLang(saved || ((navigator.language || '').slice(0, 2) === 'de' ? 'de' : 'en'));
+  document.querySelectorAll('[data-set]').forEach(function (b) { b.onclick = function () { setLang(b.dataset.set); }; });
+
+  var btn = document.getElementById('copyBtn');
+  if (COPY_URL.indexOf('PASTE_') !== -1) {
+    btn.classList.add('off'); btn.removeAttribute('href');
+    document.getElementById('copyMissing').hidden = false;
+  } else btn.href = COPY_URL;
+})();
+</script>
+</body>
+</html>

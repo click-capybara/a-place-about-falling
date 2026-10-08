@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Place About Falling</title>
+<meta property="og:title" content="A Place About Falling 🧗">
+<meta property="og:description" content="Bouldering sessions, live check-ins and an open invite to come climb.">
+<meta name="description" content="Bouldering sessions, live check-ins and an open invite to come climb.">
+<meta name="theme-color" content="#1c1b19">
+<!-- Bungee is self-hosted (bungee.woff2 in this repo, license: OFL-Bungee.txt),
+     so no visitor data goes to Google Fonts -->
+<link rel="preload" href="bungee.woff2" as="font" type="font/woff2" crossorigin>
+<!-- favicon: the climber (solid silhouette so it stays readable at 16 px) -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Falling">
+<style>
+  @font-face {
+    font-family: 'Bungee';
+    src: url('bungee.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     CLIMB WITH ME — semi-public bouldering schedule.
+     Anyone with the link sees upcoming sessions (from your bouldering
+     calendar), can join one, ask for another gym/day, or sign up for
+     updates. Open with ?admin=YOUR-KEY for your "I'm at the gym" switch.
+     All wording + gyms you might change are marked with ✏️ in the script.
+     ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --char: #1c1b19; --char-2: #262420; --char-3: #36332d; --line: #3f3b34;
+    --yellow: #fcba01; --yellow-deep: #b98700; --cream: #fff8e6; --muted: #b4ad9f; --dim: #8b8579;
+    --sans: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+    color-scheme: dark;
+  }
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  html, body { margin: 0; background: var(--char); color: var(--cream); font-family: var(--sans); -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh;
+    background-image: radial-gradient(rgba(252, 186, 1, 0.07) 1.3px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 0; background: none; }
+  :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+  a { color: var(--yellow); }
+
+  .wrap { max-width: 540px; margin: 0 auto; padding: 44px 20px 70px; }
+
+  /* ---- top ---- */
+  .hello { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 16px; flex: none; overflow: hidden;
+    background: var(--yellow); color: var(--char); display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 22px; transform: rotate(-4deg);
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .hello p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.4; }
+  h1 {
+    font-size: clamp(40px, 11vw, 64px); font-weight: 800; letter-spacing: -0.045em; line-height: 0.95;
+    margin: 0 0 14px;
+  }
+  .intro { color: var(--muted); font-size: 16px; line-height: 1.55; margin: 0 0 30px; max-width: 30em; }
+
+  /* ---- the live banner: the one loud thing on the page ---- */
+  .live {
+    display: none; position: relative; overflow: hidden;
+    background: var(--yellow); color: var(--char); border-radius: 20px;
+    padding: 20px 20px 18px; margin: 0 0 32px;
+    transform: rotate(-1deg);
+    box-shadow: 0 6px 0 var(--yellow-deep);
+  }
+  .live.on { display: block; animation: liveIn 0.6s var(--ease); }
+  @keyframes liveIn { from { opacity: 0; transform: rotate(-1deg) translateY(10px) scale(0.98); } }
+  .live .pulse { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .live .pulse i { width: 11px; height: 11px; border-radius: 50%; background: #1fae5b; position: relative; box-shadow: 0 0 0 2px var(--char); }
+  .live .pulse i::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid #1fae5b;
+    animation: ping 1.6s ease-out infinite;
+  }
+  @keyframes ping { from { opacity: 0.7; transform: scale(0.5); } to { opacity: 0; transform: scale(1.6); } }
+  .live strong { display: block; font-size: clamp(24px, 6.5vw, 32px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; text-wrap: balance; }
+  .live span.until { display: block; margin-top: 6px; font-size: 15px; font-weight: 600; }
+  .live a { color: var(--char); font-weight: 700; }
+
+  /* ---- pager under the sessions ---- */
+  .pager { display: none; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+  .pager.on { display: flex; }
+  .pg-btn { padding: 10px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--cream);
+    box-shadow: inset 0 0 0 1.5px var(--line); }
+  .pg-btn:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--yellow); }
+  .pg-btn:disabled { opacity: 0.3; cursor: default; }
+  .pg-count { font-size: 13px; font-weight: 700; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+  /* ---- loading: a little route of holds lighting up, moonboard-style ---- */
+  .content.pending { display: none; }
+
+  .content.revealed { animation: contentIn 0.6s cubic-bezier(.16, 1, .3, 1); }
+  @keyframes contentIn { from { opacity: 0; transform: translateY(12px); } }
+  .loader { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 34px 0 40px; }
+  .loader[hidden] { display: none; }
+  .loader p { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); min-height: 1.4em; transition: opacity 0.25s ease; }
+  .climber { width: 104px; height: 121px; overflow: visible; }
+  .climber .wall { fill: var(--char-2); }
+  .climber .holds path { fill: var(--yellow); }
+  .climber .holds { animation: wallDown 1.8s linear infinite; }
+  @keyframes wallDown { to { transform: translateY(70px); } }       /* one hold-spacing per cycle → seamless */
+  .climber .limb, .climber .head { fill: none; stroke: var(--cream); stroke-width: 6.5; stroke-linecap: round; stroke-linejoin: round; }
+  .climber .body { animation: bob 0.9s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+  .climber .limb { transform-box: view-box; }
+  .climber .arm-l { transform-origin: 60px 58px; animation: armL 1.8s ease-in-out infinite; }
+  .climber .arm-r { transform-origin: 60px 58px; animation: armR 1.8s ease-in-out infinite; }
+  .climber .leg-l { transform-origin: 60px 86px; animation: legL 1.8s ease-in-out infinite; }
+  .climber .leg-r { transform-origin: 60px 86px; animation: legR 1.8s ease-in-out infinite; }
+  /* left arm + right leg reach together, then the other pair */
+  @keyframes armL { 0%, 100% { transform: rotate(0); }   50% { transform: rotate(-62deg) translate(2px, 8px); } }
+  @keyframes armR { 0%, 100% { transform: rotate(0); }   50% { transform: rotate(-42deg); } }
+  @keyframes legL { 0%, 100% { transform: rotate(-22deg); } 50% { transform: rotate(0); } }
+  @keyframes legR { 0%, 100% { transform: rotate(0); }      50% { transform: rotate(24deg); } }
+  @media (prefers-reduced-motion: reduce) { .climber * { animation: none !important; } }
+
+  /* ---- rest-day card (shown when I'm not at a gym) ----
+     one flat row: charging battery on the left, the words on the right */
+  .rest {
+    display: none; margin: 0 0 32px; padding: 16px 18px 16px 16px; border-radius: 16px;
+    background: var(--char-2);
+    grid-template-columns: auto 1fr; gap: 18px; align-items: center;
+  }
+  .rest.on { display: grid; }
+  .rest-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 5px;
+    font-size: 12px; font-weight: 700; color: var(--dim); }
+  .rest-dot { display: inline-flex; align-items: center; gap: 7px; }
+  .rest-dot i { width: 8px; height: 8px; border-radius: 50%; background: #ff5a4e; animation: doze 3.2s ease-in-out infinite; }
+  @keyframes doze { 50% { opacity: 0.35; } }
+  .rest-meta .pct { padding-left: 10px; border-left: 1px solid var(--line); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rest strong { display: block; font-size: 17px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.3; }
+  .rest-next { display: block; margin-top: 4px; font-size: 13px; color: var(--dim); }
+
+  /* the charging battery: fills up once it's on screen, then a shimmer keeps running */
+  .battery {
+    position: relative; width: 58px; height: 28px; padding: 3px;
+    border: 2px solid rgba(255, 248, 230, 0.75); border-radius: 8px;
+  }
+  .battery::after { content: ''; position: absolute; right: -6px; top: 8px; width: 3px; height: 8px; border-radius: 0 3px 3px 0; background: rgba(255, 248, 230, 0.75); }
+  .battery .lvl {
+    --c: #ff5a4e;
+    height: 100%; width: 0; border-radius: 4px; background: var(--c); position: relative; overflow: hidden;
+    transition: width 1.6s cubic-bezier(.2, .8, .2, 1), background 0.6s ease;
+  }
+  .battery .lvl::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: translateX(-100%); animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+  .battery .lvl.loop { animation: chargeLoop 3.2s ease-in-out infinite; }
+  @keyframes chargeLoop { 0% { width: 8%; } 85%, 100% { width: 100%; } }
+  .battery .bolt {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; line-height: 1; animation: boltPulse 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
+  }
+  @keyframes boltPulse { 50% { transform: scale(1.18); } }
+
+  /* ---- section headings ---- */
+  h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 14px; }
+  .section { margin-top: 40px; }
+
+  /* ---- sessions ---- */
+  .sessions { display: grid; gap: 12px; }
+  .session {
+    display: grid; grid-template-columns: 64px 1fr; gap: 16px; align-items: start;
+    background: var(--char-2); border-radius: 18px; padding: 16px; box-shadow: inset 0 0 0 1.5px var(--line);
+  }
+  .session.mine { box-shadow: inset 0 0 0 2px var(--yellow); }
+  .day { text-align: center; border-radius: 14px; background: var(--char-3); padding: 9px 0 8px; }
+  .day b { display: block; font-size: 30px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .day span { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 3px; }
+  .session.today .day { background: var(--yellow); color: var(--char); }
+  .session.today .day span { color: var(--char); }
+  .time { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .gym { margin-top: 2px; font-size: 15px; font-weight: 600; }
+  .gym a { color: inherit; text-decoration-color: rgba(255, 248, 230, 0.3); text-underline-offset: 3px; }
+  .label { margin-top: 2px; font-size: 13px; color: var(--dim); }
+  .going { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .going.empty { color: var(--dim); }
+  .row-actions { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--yellow); color: var(--char); font-weight: 800; font-size: 15px;
+    padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 0 var(--yellow-deep);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--yellow-deep); }
+  .btn.ghost { background: transparent; color: var(--cream); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .btn.ghost:active { transform: translateY(1px); }
+  .link-btn { color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; padding: 6px 2px; }
+  .you-going { font-size: 14px; font-weight: 700; color: var(--yellow); }
+
+  /* inline join form */
+  .join-form { grid-column: 1 / -1; display: none; gap: 10px; margin-top: 4px; }
+  .join-form.open { display: grid; animation: formIn 0.35s var(--ease); }
+  @keyframes formIn { from { opacity: 0; transform: translateY(-6px); } }
+  .fields { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
+  @media (max-width: 420px) { .fields { grid-template-columns: 1fr; } }
+  input[type=text], input[type=email], select, textarea {
+    width: 100%; background: var(--char); border: 0; box-shadow: inset 0 0 0 1.5px var(--line);
+    border-radius: 12px; padding: 12px 14px; font-size: 16px; color: var(--cream); outline: none;
+  }
+  input:focus, select:focus, textarea:focus { box-shadow: inset 0 0 0 2px var(--yellow); }
+  ::placeholder { color: var(--dim); }
+  select { -webkit-appearance: none; appearance: none; padding-right: 38px;
+    background: var(--char) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23fcba01' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; }
+  textarea { resize: vertical; min-height: 74px; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--muted); line-height: 1.45; cursor: pointer; }
+  .consent input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--yellow); flex: none; }
+  .err { color: #ff9b7a; font-size: 13px; font-weight: 600; min-height: 1em; }
+  .ok-note { font-size: 14px; font-weight: 600; color: var(--yellow); }
+
+  .empty-state { background: var(--char-2); border-radius: 18px; padding: 20px; color: var(--muted); line-height: 1.5; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .loading { color: var(--dim); font-size: 14px; }
+
+  /* ---- ask / notify panels ---- */
+  .panel { background: var(--char-2); border-radius: 20px; padding: 20px; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .panel p.sub { margin: -6px 0 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+  .stack { display: grid; gap: 10px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 9px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .chip[aria-pressed="true"] { background: var(--yellow); color: var(--char); box-shadow: none; }
+  .chip:disabled { opacity: 0.4; cursor: default; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .date-row { display: grid; gap: 12px; }
+
+  /* step 2 of "Pitch me a session": revealed after picking a gym */
+  .ask-more { display: grid; gap: 10px; }
+  .ask-more:not([hidden]) { animation: formIn 0.35s var(--ease); }
+  .ask-more[hidden], .ask-loading[hidden], #askNextRow[hidden] { display: none; }
+  .ask-loading { padding: 0; transition: opacity 0.2s ease; }
+  .ask-loading.out { opacity: 0; }
+  .ask-loading canvas { display: block; width: 100%; }
+  #askGymErr:empty { display: none; }
+  /* "Pick a day": quiet hover, just the arrow nudging forward */
+  .btn-next .nx { display: inline-block; margin-left: 6px; transition: transform 0.2s var(--ease); }
+  .btn-next:hover .nx, .btn-next:focus-visible .nx { transform: translateX(4px); }
+
+  /* month calendar — same look as the booking pass on the invite pages */
+  .cal {
+    background: var(--yellow); color: var(--char); border-radius: 16px; padding: 16px 14px 14px;
+    -webkit-mask:
+      radial-gradient(circle 11px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 11px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 11px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 11px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+  }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 10px;
+    border-bottom: 2px dashed rgba(28, 27, 25, 0.3); margin-bottom: 10px; }
+  .cal-head b { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+  .cal-nav { width: 34px; height: 34px; border-radius: 10px; font-size: 20px; font-weight: 800; color: var(--char);
+    background: rgba(255, 255, 255, 0.35); display: flex; align-items: center; justify-content: center; }
+  .cal-nav:disabled { opacity: 0.3; cursor: default; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+  .cal-grid .wd { font-size: 11px; font-weight: 700; color: rgba(28, 27, 25, 0.6); padding: 4px 0; }
+  .cal-day { position: relative; aspect-ratio: 1; max-height: 44px; border-radius: 50%; font-size: 15px; font-weight: 700;
+    color: var(--char); display: flex; align-items: center; justify-content: center; margin: 0 auto; width: 100%; max-width: 44px; }
+  .cal-day:hover:not(:disabled) { background: rgba(28, 27, 25, 0.1); }
+  .cal-day:disabled { color: rgba(28, 27, 25, 0.28); cursor: default; }
+  .cal-day.today { box-shadow: inset 0 0 0 2px rgba(28, 27, 25, 0.45); }
+  .cal-day.sel { background: var(--char); color: var(--yellow); }
+  .cal-day.full { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .cal-day.has::after { content: ''; position: absolute; bottom: 5px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .cal-hint { margin: 10px 4px 0; font-size: 12px; font-weight: 600; color: rgba(28, 27, 25, 0.7); }
+  .inline { display: flex; gap: 10px; }
+
+  /* the small "ping me" line near the bottom */
+  .ping { margin-top: 36px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .ping p { margin: 0 0 10px; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .ping .btn { padding: 10px 16px; font-size: 14px; }
+  .ping input { padding: 10px 14px; }
+  .ping .err { margin-top: 6px; }
+  .inline input { flex: 1; min-width: 0; }
+
+  /* ---- host panel (?admin=…) ---- */
+  .host { display: none; margin: 0 0 30px; border-radius: 20px; padding: 18px 20px 20px;
+    background: var(--char-2); box-shadow: inset 0 0 0 2px var(--yellow); }
+  .host.on { display: block; }
+  .host .only-you { margin: 10px 0 14px; font-size: 12px; font-weight: 700; color: var(--yellow); }
+  .host-label { margin: 6px 0 -2px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .host-label span { font-weight: 600; color: var(--dim); }
+  .host-until { width: 100%; background: var(--char); border: 0; box-shadow: inset 0 0 0 1.5px var(--line);
+    border-radius: 12px; padding: 12px 14px; font-size: 16px; color: var(--cream); color-scheme: dark; }
+  .host-until[hidden] { display: none; }
+  /* "for this session" card: today's planned session, one tap */
+  .host-session { display: grid; gap: 4px; padding: 14px 16px; border-radius: 14px; text-align: left;
+    background: var(--char-3); box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; }
+  .host-session[hidden] { display: none; }
+  .host-session b { font-size: 15px; font-weight: 800; }
+  .host-session span { font-size: 13px; color: var(--muted); }
+  .host-session[aria-pressed="true"] { background: var(--yellow); color: var(--char); box-shadow: none; }
+  .host-session[aria-pressed="true"] span { color: rgba(28, 27, 25, 0.75); }
+  .live .plan { display: block; margin-top: 4px; font-size: 13px; font-weight: 700; opacity: 0.8; }
+  .forget-admin { font-size: 12px; font-weight: 700; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; padding: 0; }
+  /* collapsible: the title row is the toggle */
+  .host-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; padding: 0; }
+  .host-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+  #hostTitle { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+  .host-status { font-size: 12px; font-weight: 700; color: var(--muted); }
+  .host-status.is-live { color: #1fae5b; }
+  .chev { font-size: 22px; line-height: 1; color: var(--yellow); transition: transform 0.25s ease; transform: translateY(-4px); }
+  .host-toggle[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+  .host-body[hidden] { display: none; }
+  .host:has(.host-toggle[aria-expanded="false"]) { padding-bottom: 18px; }
+
+  footer { margin-top: 48px; color: var(--dim); font-size: 12px; line-height: 1.6; }
+  footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+  footer a { color: var(--muted); font-weight: 700; text-decoration: none; }
+  footer .legal { display: flex; gap: 16px; }
+  footer a:hover { color: var(--yellow); }
+  .other-invite { display: flex; align-items: center; gap: 14px; margin-top: 26px; padding: 14px 16px;
+    border-radius: 16px; background: var(--char-2); color: var(--cream); text-decoration: none;
+    box-shadow: inset 0 0 0 2px var(--yellow); transition: transform 0.2s ease; }
+  .other-invite[hidden] { display: none; }
+  .other-invite:hover { transform: translateX(3px); }
+  .other-invite:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  /* the splash layer: same card, yellow with charcoal text */
+  .other-invite .ink-top { justify-content: flex-start; gap: 14px; padding: 14px 16px;
+    background: var(--yellow); color: var(--char); }
+  .other-invite .ink-top small { color: rgba(28, 27, 25, 0.72); }
+  .other-invite .ink-top .arrow { color: var(--char); }
+  .other-invite .oi-emoji { font-size: 26px; }
+  .other-invite b { display: block; font-size: 15px; font-weight: 800; }
+  .other-invite small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .other-invite .arrow { margin-left: auto; color: var(--yellow); font-size: 18px; font-weight: 800; }
+  .privacy { margin: 12px 0 0; color: var(--dim); font-size: 12px; line-height: 1.6; }
+
+  /* ═══ admin dashboard ═══ */
+  /* header row of the admin panel: toggle + always-visible dashboard button */
+  .host-header { display: flex; align-items: center; gap: 12px; }
+  .host-header .host-toggle { flex: 1; min-width: 0; }
+  .dash-pill {
+    flex: none; background: var(--yellow); color: var(--char); text-decoration: none;
+    font-size: 13px; font-weight: 800; padding: 8px 12px; border-radius: 10px; box-shadow: 0 3px 0 var(--yellow-deep);
+  }
+  .dash-pill:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--yellow-deep); }
+  .dash[hidden] { display: none; }
+  .dash-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .dash-back { font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: none; }
+  .dash-title { font-size: clamp(36px, 10vw, 52px); margin-bottom: 6px; }
+  .dash-sub { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat { background: var(--char-2); border-radius: 14px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 28px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .dash-sec { margin-top: 36px; }
+  .dash-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .dash-sec-head h2 { margin: 0; }
+  .dcard { background: var(--char-2); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
+  .dcard-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .dcard-head b { font-size: 16px; font-weight: 800; }
+  .dcard-head span { font-size: 13px; color: var(--muted); }
+  .people { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .people li { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; flex-wrap: wrap; }
+  .people li a { color: var(--muted); text-decoration: none; font-size: 13px; overflow-wrap: anywhere; }
+  .people li.left { opacity: 0.45; text-decoration: line-through; }
+  .dcard .row-actions { margin-top: 10px; }
+  .muted-line { color: var(--dim); font-size: 13px; margin: 8px 0 0; }
+  .pitch-note { margin: 8px 0 0; font-size: 14px; color: var(--cream); line-height: 1.45; }
+  .badge { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; background: var(--char-3); color: var(--muted); }
+  .badge.active { background: #1fae5b; color: var(--char); }
+  .badge.pending { background: var(--yellow); color: var(--char); }
+  .sub-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .sub-row a { color: var(--cream); text-decoration: none; overflow-wrap: anywhere; }
+  .sub-row small { color: var(--dim); font-size: 12px; white-space: nowrap; }
+  #subFilter { margin-bottom: 6px; }
+  .visit-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .visit-row b { font-size: 15px; font-weight: 800; }
+  .visit-row .vt { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .visit-row .vd { grid-row: span 2; align-self: center; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+  .visit-row .vd small { display: block; font-size: 11px; font-weight: 700; color: var(--dim); }
+  .visit-row.open .vd { color: #1fae5b; }
+  #visitStats { margin: 0 0 6px; }
+  .del-btn { font-size: 12px; font-weight: 800; color: var(--muted); padding: 6px 10px; border-radius: 8px;
+    box-shadow: inset 0 0 0 1.5px var(--line); }
+  .del-btn.armed { background: #ff5a4e; color: var(--char); box-shadow: none; }
+  .del-btn:disabled { opacity: 0.5; }
+  #dashPager { margin: 4px 0 0; }
+
+  /* ---- ink (same engine as the invite pages) ---- */
+  .ink { position: relative; overflow: hidden; isolation: isolate; }
+  .ink-top {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: var(--char); color: var(--yellow);
+    display: flex; align-items: center; justify-content: center; border-radius: inherit;
+    -webkit-mask: linear-gradient(transparent, transparent); mask: linear-gradient(transparent, transparent);
+    will-change: mask;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+
+  /* ═══ Bungee for the headlines — the rest stays in the regular font ═══ */
+  :root { --display: 'Bungee', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; }
+  h1, h2, .live strong, .day b, .dash-title, #hostTitle, .cal-head b {
+    font-family: var(--display);
+    font-weight: 400;          /* Bungee only has one weight */
+    letter-spacing: 0;         /* it's wide already */
+  }
+  h1 { font-size: clamp(30px, 8.5vw, 50px); line-height: 1.08; }
+  h2 { font-size: 20px; }
+  .live strong { font-size: clamp(21px, 5.8vw, 27px); line-height: 1.15; }
+  .day b { font-size: 26px; }
+  .dash-title { font-size: clamp(30px, 8.5vw, 44px); }
+  #hostTitle { font-size: 16px; }
+  .cal-head b { font-size: 15px; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     APP SHELL: sticky top bar, menu, QR sheet, admin sheet,
+     dashboard tabs. Everything below is new; the page above is unchanged.
+     ═══════════════════════════════════════════════════════════════ */
+  :root { --bar-h: 58px; }
+  html { scroll-padding-top: calc(var(--bar-h) + 12px + env(safe-area-inset-top, 0px)); }
+  .wrap { padding-top: 22px; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 40; height: var(--bar-h);
+    display: flex; align-items: center; gap: 8px; padding: 0 max(12px, calc((100vw - 540px) / 2 + 12px));
+    background: rgba(28, 27, 25, 0.82); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    box-shadow: 0 1px 0 transparent; transition: box-shadow 0.25s ease;
+  }
+  .topbar.scrolled { box-shadow: 0 1px 0 var(--line); }
+  .tb-brand { display: flex; align-items: center; gap: 10px; min-width: 0; margin-right: auto;
+    color: var(--cream); text-decoration: none; }
+  .tb-logo { width: 34px; height: 34px; border-radius: 10px; background: var(--yellow); flex: none;
+    display: grid; place-items: center; transform: rotate(-4deg); }
+  .tb-logo img { width: 24px; height: 24px; image-rendering: auto; }
+  .tb-name { font-family: 'Bungee', var(--sans); font-size: 15px; letter-spacing: 0.01em; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; opacity: 0; transform: translateY(4px);
+    transition: opacity 0.25s ease, transform 0.25s var(--ease); }
+  .topbar.scrolled .tb-name, .topbar.always .tb-name { opacity: 1; transform: none; }
+  .tb-live { display: none; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    background: rgba(31, 174, 91, 0.14); color: #4fd18a; font-size: 12px; font-weight: 800; white-space: nowrap; }
+  .tb-live.on { display: inline-flex; }
+  .tb-live i { width: 8px; height: 8px; border-radius: 50%; background: #1fae5b; animation: tbPulse 1.8s ease-in-out infinite; }
+  @keyframes tbPulse { 50% { box-shadow: 0 0 0 5px rgba(31, 174, 91, 0); } 0% { box-shadow: 0 0 0 0 rgba(31, 174, 91, 0.6); } }
+  .tb-btn { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none;
+    color: var(--cream); transition: background 0.15s ease; }
+  .tb-btn:hover { background: var(--char-3); }
+  .tb-btn svg { width: 22px; height: 22px; }
+  .tb-btn.qr { background: var(--yellow); color: var(--char); }
+  .tb-btn.qr:hover { background: #ffc828; }
+  /* burger ↔ X */
+  .burger { position: relative; width: 20px; height: 14px; }
+  .burger i { position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: currentColor;
+    transition: transform 0.3s var(--ease), opacity 0.2s ease, top 0.3s var(--ease); }
+  .burger i:nth-child(1) { top: 0; } .burger i:nth-child(2) { top: 6px; } .burger i:nth-child(3) { top: 12px; }
+  [aria-expanded="true"] .burger i:nth-child(1) { top: 6px; transform: rotate(45deg); }
+  [aria-expanded="true"] .burger i:nth-child(2) { opacity: 0; }
+  [aria-expanded="true"] .burger i:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+  /* shared backdrop */
+  .scrim { position: fixed; inset: 0; z-index: 35; background: rgba(10, 10, 9, 0.6);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  .scrim.on { opacity: 1; pointer-events: auto; }
+  body.locked { overflow: hidden; }
+
+  /* menu: drops down under the bar */
+  .menu { position: fixed; z-index: 39; left: 0; right: 0; top: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
+    max-height: calc(100dvh - var(--bar-h) - env(safe-area-inset-top, 0px)); overflow-y: auto;
+    background: var(--char); border-bottom: 1px solid var(--line); padding: 8px 0 18px;
+    transform: translateY(-12px); opacity: 0; visibility: hidden;
+    transition: transform 0.3s var(--ease), opacity 0.2s ease, visibility 0.3s; }
+  .menu.on { transform: none; opacity: 1; visibility: visible; }
+  .menu-in { max-width: 540px; margin: 0 auto; padding: 0 12px; }
+  .menu-group { margin: 6px 0 2px; padding: 10px 12px 4px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--dim); }
+  .menu a, .menu button.mi { width: 100%; display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 14px;
+    color: var(--cream); text-decoration: none; text-align: left; transition: background 0.15s ease; }
+  .menu a:hover, .menu button.mi:hover, .menu a:focus-visible, .menu button.mi:focus-visible { background: var(--char-2); }
+  .mi-ico { width: 40px; height: 40px; border-radius: 12px; background: var(--char-2); display: grid; place-items: center;
+    font-size: 19px; flex: none; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .mi-txt b { display: block; font-size: 16px; font-weight: 800; }
+  .mi-txt small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .mi-go { margin-left: auto; color: var(--dim); font-weight: 800; }
+  .menu .mi.admin .mi-ico { background: var(--yellow); box-shadow: none; }
+  .menu-foot { display: flex; gap: 16px; padding: 14px 12px 0; margin-top: 8px; border-top: 1px solid var(--line); font-size: 13px; }
+  .menu-foot a { display: inline; width: auto; padding: 0; color: var(--muted); font-weight: 700; }
+  .menu-foot a:hover { background: none; color: var(--yellow); }
+
+  /* bottom sheet (QR + "I'm at the gym") */
+  .sheet { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; max-height: 92dvh; overflow-y: auto;
+    background: var(--char-2); border-radius: 24px 24px 0 0; box-shadow: 0 -1px 0 var(--line), 0 -20px 50px rgba(0, 0, 0, 0.4);
+    padding: 10px 20px calc(22px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(105%); visibility: hidden; transition: transform 0.38s var(--ease), visibility 0.38s; }
+  .sheet.on { transform: none; visibility: visible; }
+  @media (min-width: 600px) { .sheet { left: 50%; right: auto; width: 520px; margin-left: -260px; } }
+  .sheet-grip { width: 42px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 12px; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .sheet-head h2 { margin: 0; font-size: 20px; }
+  .sheet-x { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: var(--muted); font-size: 22px; line-height: 1; }
+  .sheet-x:hover { background: var(--char-3); color: var(--cream); }
+
+  /* QR ticket */
+  .qr-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 14px;
+    background: var(--char); box-shadow: inset 0 0 0 1.5px var(--line); margin-bottom: 14px; }
+  .qr-switch button { padding: 9px 8px; border-radius: 10px; font-size: 14px; font-weight: 800; color: var(--muted); }
+  .qr-switch button[aria-pressed="true"] { background: var(--yellow); color: var(--char); }
+  .qr-ticket { background: var(--yellow); color: var(--char); border-radius: 18px; padding: 22px 22px 18px; text-align: center;
+    -webkit-mask: radial-gradient(circle 11px at 0 62%, transparent 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 11px at 100% 62%, transparent 98%, #000) right / 51% 100% no-repeat;
+    mask: radial-gradient(circle 11px at 0 62%, transparent 98%, #000) left / 51% 100% no-repeat,
+          radial-gradient(circle 11px at 100% 62%, transparent 98%, #000) right / 51% 100% no-repeat; }
+  .qr-ticket .qr-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+  .qr-ticket .qr-title { margin: 4px 0 14px; font-family: 'Bungee', var(--sans); font-size: 22px; line-height: 1.1; }
+  .qr-code { width: min(64vw, 240px); aspect-ratio: 1; margin: 0 auto; border-radius: 12px; overflow: hidden; }
+  .qr-code svg { display: block; width: 100%; height: 100%; }
+  .qr-url { margin: 16px 0 0; padding-top: 14px; border-top: 2px dashed rgba(28, 27, 25, 0.35);
+    font-size: 13px; font-weight: 700; word-break: break-all; }
+  .qr-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .qr-actions .btn { width: 100%; }
+  .qr-hint { margin: 12px 0 0; text-align: center; font-size: 12px; color: var(--dim); }
+
+  /* admin: floating "I'm at the gym" button + the panel inside a sheet */
+  .fab { position: fixed; z-index: 30; right: max(16px, calc((100vw - 540px) / 2 + 16px));
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    display: inline-flex; align-items: center; gap: 8px; padding: 13px 18px; border-radius: 999px;
+    background: var(--yellow); color: var(--char); font-weight: 800; font-size: 15px;
+    box-shadow: 0 4px 0 var(--yellow-deep), 0 12px 30px rgba(0, 0, 0, 0.45); transition: transform 0.15s ease; }
+  .fab:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--yellow-deep), 0 8px 20px rgba(0, 0, 0, 0.4); }
+  .fab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--char); opacity: 0.35; }
+  .fab.live .dot { background: #1fae5b; opacity: 1; box-shadow: 0 0 0 2px rgba(28, 27, 25, 0.25); }
+  .fab[hidden] { display: none; }
+  body.has-fab .wrap { padding-bottom: 110px; }
+  .sheet .host { display: block; margin: 0; padding: 0; box-shadow: none; background: none; border-radius: 0; }
+  .sheet .host-header { display: none; }
+  .sheet .host-body[hidden] { display: block; }
+
+  /* dashboard: one section at a time, tabs at the bottom */
+  .dash .dash-top { display: none; }
+  .dash .dash-title { margin-top: 6px; }
+  .dash .dash-sec { margin-top: 26px; }
+  .dash-tabs { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0;
+    padding: 8px max(10px, calc((100vw - 540px) / 2 + 10px)) calc(8px + env(safe-area-inset-bottom, 0px));
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    background: rgba(28, 27, 25, 0.9); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    box-shadow: 0 -1px 0 var(--line); }
+  .dash-tabs button { position: relative; display: grid; justify-items: center; gap: 3px; padding: 7px 2px 6px; border-radius: 12px;
+    color: var(--dim); font-size: 11.5px; font-weight: 800; }
+  .dash-tabs button .ti { font-size: 19px; line-height: 1; filter: grayscale(1); opacity: 0.7; transition: filter 0.2s, opacity 0.2s; }
+  .dash-tabs button[aria-selected="true"] { color: var(--cream); background: var(--char-2); }
+  .dash-tabs button[aria-selected="true"] .ti { filter: none; opacity: 1; }
+  .dash-tabs .badge { position: absolute; top: 3px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 9px; background: var(--yellow); color: var(--char); font-size: 11px; line-height: 18px; text-align: center; }
+  .dash-tabs .badge:empty { display: none; }
+  .dash.tabbed { padding-bottom: 110px; }
+  .dash.tabbed [data-tab] { display: none; }
+  .dash.tabbed [data-tab].on { display: block; animation: formIn 0.3s var(--ease); }
+  .tb-btn[hidden], .qr-actions .btn[hidden], .menu [hidden] { display: none; }
+  .dash.tabbed .dash-title { display: none; }
+  .dash.tabbed .dash-sub { margin: 4px 0 6px; }
+
+  /* ═══ landing ═══ */
+  .landing[hidden], #page[hidden] { display: none; }
+  .landing { padding-top: 34px; }
+  .ld-badge { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px;
+    background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); font-size: 13px; font-weight: 700; }
+  .ld-badge .tb-logo { width: 28px; height: 28px; border-radius: 8px; }
+  .ld-badge .tb-logo img { width: 20px; height: 20px; }
+  .ld-title { margin: 22px 0 14px; font-size: clamp(42px, 12vw, 66px); }
+  .ld-lead { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; }
+  .ld-cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 0; }
+  .ld-cta .btn { text-decoration: none; padding: 14px 20px; font-size: 16px; }
+  .ld-last { display: inline-block; margin-top: 16px; color: var(--yellow); font-weight: 700; font-size: 14px; text-decoration: none; }
+  .ld-last[hidden] { display: none; }
+  .ld-feats { list-style: none; padding: 0; margin: 38px 0 0; display: grid; gap: 10px; }
+  .ld-feats li { display: grid; grid-template-columns: 44px 1fr; column-gap: 12px; align-items: start; padding: 14px;
+    border-radius: 16px; background: var(--char-2); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .ld-feats span { grid-row: span 2; width: 44px; height: 44px; border-radius: 12px; background: var(--char); display: grid; place-items: center; font-size: 21px; }
+  .ld-feats b { font-size: 16px; font-weight: 800; }
+  .ld-feats small { color: var(--muted); font-size: 14px; line-height: 1.45; margin-top: 2px; }
+  .ld-how { margin-top: 34px; background: var(--yellow); color: var(--char); border-radius: 20px; padding: 22px 22px 18px; }
+  .ld-how h2 { margin: 0 0 12px; color: var(--char); }
+  .ld-how ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; line-height: 1.45; }
+  .ld-note { margin: 14px 0 0; padding-top: 12px; border-top: 2px dashed rgba(28, 27, 25, 0.35); font-size: 13px; font-weight: 600; }
+  .landing footer { margin-top: 40px; }
+  .qr-switch[hidden] { display: none; }
+  html.awaiting .hello, html.awaiting #title, html.awaiting #intro { visibility: hidden; }
+</style>
+</head>
+<body>
+<!-- ═══ APP SHELL: top bar + menu ═══ -->
+<header class="topbar" id="topbar">
+  <a class="tb-brand" href="#top" id="tbBrand" aria-label="Back to top">
+    <span class="tb-logo"><img src="favicon-32.png" alt="" width="24" height="24"></span>
+    <span class="tb-name" id="tbName">A Place About Falling</span>
+  </a>
+  <span class="tb-live" id="tbLive"><i></i><span id="tbLiveText">live</span></span>
+  <button type="button" class="tb-btn" id="tbRefresh" aria-label="Refresh" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+  </button>
+  <button type="button" class="tb-btn qr" id="tbQr" aria-label="Show QR code" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v2h-3v-2zm-5 0h3v3h-3v-3zm3 3h2v2h-2v-2zm-3 3h3v2h-3v-2zm5 0h3v2h-3v-2zm1-3h2v2h-2v-2z"/><rect x="6" y="6" width="2" height="2"/><rect x="16" y="6" width="2" height="2"/><rect x="6" y="16" width="2" height="2"/></svg>
+  </button>
+  <button type="button" class="tb-btn" id="tbMenu" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+    <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
+</header>
+
+<div class="scrim" id="scrim"></div>
+
+<nav class="menu" id="menu" aria-label="Menu">
+  <div class="menu-in">
+    <a href="#rightNow" data-page><span class="mi-ico">📍</span><span class="mi-txt"><b>Where am I?</b><small>Live at a gym or charging</small></span></a>
+    <a href="#nextSessions" data-page><span class="mi-ico">📅</span><span class="mi-txt"><b>Next sessions</b><small>Pick one and chalk up</small></span></a>
+    <a href="#pitch" data-page><span class="mi-ico">✋</span><span class="mi-txt"><b>Pitch me a session</b><small>Your gym, your day</small></span></a>
+    <a href="#ping" data-page><span class="mi-ico">🔔</span><span class="mi-txt"><b>Ping me</b><small>Email when there's a new session</small></span></a>
+    <button type="button" class="mi" id="menuQr"><span class="mi-ico">📱</span><span class="mi-txt"><b>QR code</b><small>Let someone at the gym scan it</small></span></button>
+    <a href="#" id="menuHangout" target="_self"><span class="mi-ico">🍻</span><span class="mi-txt"><b>Hangout invite</b><small>Food, drinks or sport instead</small></span><span class="mi-go">↗</span></a>
+
+    <div id="menuAdmin" hidden>
+      <div class="menu-group">Only you see this</div>
+      <button type="button" class="mi admin" id="menuHost"><span class="mi-ico">🧗</span><span class="mi-txt"><b>I'm at the gym</b><small id="menuHostSub">Check in or out</small></span></button>
+      <a href="#" class="mi admin" id="menuDash"><span class="mi-ico">📊</span><span class="mi-txt"><b>Dashboard</b><small>Who's in, pitches, ping list</small></span></a>
+      <a href="#" class="mi admin" id="menuPage" hidden><span class="mi-ico">🏠</span><span class="mi-txt"><b>Back to the page</b><small>What everyone else sees</small></span></a>
+    </div>
+
+    <div class="menu-foot">
+      <a href="privacy.html" class="privacy-link">Datenschutz / Privacy</a>
+      <a href="rechtliches.html#impressum">Impressum</a>
+    </div>
+  </div>
+</nav>
+
+<!-- QR sheet -->
+<div class="sheet" id="qrSheet" role="dialog" aria-modal="true" aria-labelledby="qrSheetTitle">
+  <div class="sheet-grip" aria-hidden="true"></div>
+  <div class="sheet-head"><h2 id="qrSheetTitle">Scan &amp; join</h2><button type="button" class="sheet-x" data-close aria-label="Close">×</button></div>
+  <div class="qr-switch" id="qrSwitch" role="group" aria-label="Which page">
+    <button type="button" data-qr="climb" aria-pressed="true">🧗 Sessions</button>
+    <button type="button" data-qr="hangout" aria-pressed="false">🍻 Hangout</button>
+  </div>
+  <div class="qr-ticket">
+    <div class="qr-kicker" id="qrKicker">point your camera here</div>
+    <div class="qr-title" id="qrTitle">A Place About Falling</div>
+    <div class="qr-code" id="qrCode"></div>
+    <p class="qr-url" id="qrUrl"></p>
+  </div>
+  <div class="qr-actions">
+    <button type="button" class="btn" id="qrShare">Share link</button>
+    <button type="button" class="btn ghost" id="qrCopy">Copy link</button>
+  </div>
+  <p class="qr-hint">Tip: turn your screen brightness up, scanners love it.</p>
+</div>
+
+<!-- "I'm at the gym" sheet (admin only; the panel is moved in here) -->
+<div class="sheet" id="hostSheet" role="dialog" aria-modal="true" aria-labelledby="hostSheetTitle">
+  <div class="sheet-grip" aria-hidden="true"></div>
+  <div class="sheet-head"><h2 id="hostSheetTitle">I'm at the gym</h2><button type="button" class="sheet-x" data-close aria-label="Close">×</button></div>
+  <div id="hostSlot"></div>
+</div>
+
+<button type="button" class="fab" id="fab" hidden aria-haspopup="dialog"><span class="dot"></span><span id="fabText">I'm at the gym</span></button>
+
+<!-- ═══ LANDING (shown when the link has no ?c=) ═══ -->
+<main class="wrap landing" id="landing" hidden>
+  <div class="ld-badge"><span class="tb-logo"><img src="favicon-32.png" alt="" width="24" height="24"></span>for people who fall for fun</div>
+  <h1 class="ld-title">A Place About Falling</h1>
+  <p class="ld-lead">Your own little bouldering page. Friends see when you climb, join a session with one tap, or pitch you a day. Free, no app, no account here.</p>
+  <div class="ld-cta">
+    <a class="btn" href="setup.html">Get your own page</a>
+    <a class="btn ghost" href="?c=demo">See a demo</a>
+  </div>
+  <a class="ld-last" id="lastPage" href="#" hidden>← Back to <span id="lastName">your last</span> page</a>
+
+  <ul class="ld-feats">
+    <li><span>📅</span><b>Sessions from your calendar</b><small>Put a session in your Google Calendar, it shows up here.</small></li>
+    <li><span>📍</span><b>"I'm at the gym"</b><small>One tap and everyone sees where you are, until when.</small></li>
+    <li><span>✋</span><b>Pitch me a session</b><small>Friends suggest a gym and a day. Your calendar only says busy or free.</small></li>
+    <li><span>🔔</span><b>Ping list</b><small>People can get an email when you add a session. Double opt-in, of course.</small></li>
+  </ul>
+
+  <div class="ld-how">
+    <h2>How it works</h2>
+    <ol>
+      <li><b>Copy a Google Sheet.</b> One link, one click.</li>
+      <li><b>Answer a few questions</b> in the panel that opens in the sheet. About 5 minutes.</li>
+      <li><b>Share your link</b> or show the QR code at the gym.</li>
+    </ol>
+    <p class="ld-note">Everything people enter lands in <em>your</em> Google account, not on some server. This page only shows it.</p>
+  </div>
+
+  <footer>
+    <span>Powered by <a href="https://click-capybara.com" target="_blank" rel="noopener">Click-Capybara</a></span>
+    <span class="legal"><a href="privacy.html">Datenschutz</a><a href="rechtliches.html#impressum">Impressum</a></span>
+  </footer>
+</main>
+
+<main class="wrap" id="page">
+  <div class="hello">
+    <div class="avatar" id="avatar" aria-hidden="true">🧗</div>
+    <p id="helloLine">Oi! ☀️ nice to meet you on the wall</p>
+  </div>
+  <h1 id="title"></h1>
+  <p class="intro" id="intro"></p>
+
+  <!-- shown until the sessions + calendar data have arrived -->
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <!-- our own little climber: holds scroll down, limbs reach in turns -->
+    <svg class="climber" viewBox="0 0 120 140" aria-hidden="true">
+      <rect x="4" y="4" width="112" height="132" rx="22" class="wall"/>
+      <svg x="10" y="10" width="100" height="120" viewBox="10 10 100 120" overflow="hidden">
+        <g class="holds">
+          <path d="M26 6c6-4 14-1 13 5s-9 7-14 4-4-6 1-9z"/>
+          <path d="M84 30c7-2 12 3 9 8s-11 5-13 0 0-7 4-8z"/>
+          <path d="M30 52c6-3 13 1 11 6s-10 6-13 2-3-6 2-8z"/>
+          <path d="M80 76c6-4 14 0 12 6s-10 6-14 2-3-6 2-8z"/>
+          <path d="M26 6c6-4 14-1 13 5s-9 7-14 4-4-6 1-9z" transform="translate(0 140)"/>
+          <path d="M84 30c7-2 12 3 9 8s-11 5-13 0 0-7 4-8z" transform="translate(0 140)"/>
+          <path d="M30 52c6-3 13 1 11 6s-10 6-13 2-3-6 2-8z" transform="translate(0 140)"/>
+          <path d="M80 76c6-4 14 0 12 6s-10 6-14 2-3-6 2-8z" transform="translate(0 140)"/>
+          <path d="M26 6c6-4 14-1 13 5s-9 7-14 4-4-6 1-9z" transform="translate(0 -70)"/>
+          <path d="M84 30c7-2 12 3 9 8s-11 5-13 0 0-7 4-8z" transform="translate(0 -70)"/>
+          <path d="M30 52c6-3 13 1 11 6s-10 6-13 2-3-6 2-8z" transform="translate(0 70)"/>
+          <path d="M80 76c6-4 14 0 12 6s-10 6-14 2-3-6 2-8z" transform="translate(0 70)"/>
+        </g>
+        <g class="body">
+          <polyline class="limb arm-l" points="60,58 45,46 41,28"/>
+          <polyline class="limb arm-r" points="60,58 77,63 86,54"/>
+          <polyline class="limb leg-l" points="60,86 46,96 47,114"/>
+          <polyline class="limb leg-r" points="60,86 75,98 77,116"/>
+          <line class="limb" x1="60" y1="56" x2="60" y2="88"/>
+          <circle class="head" cx="60" cy="43" r="9"/>
+        </g>
+      </svg>
+    </svg>
+    <p id="loaderText">Chalking up…</p>
+  </div>
+
+  <!-- everything below the intro: hidden until loaded, then revealed at once -->
+  <div class="content pending" id="content">
+  <!-- when I'm NOT at a gym: the rest-day card with the charging battery.
+     Same spot as the live banner, so this place always answers
+     "where is he right now?" -->
+  <div class="rest" id="rest" aria-live="polite">
+    <div class="battery" aria-hidden="true"><div class="lvl" id="batteryLvl"></div><b class="bolt">⚡</b></div>
+    <div class="rest-text">
+      <div class="rest-meta"><span class="rest-dot"><i></i>off the wall</span><span class="pct" id="chargeText"></span></div>
+      <strong id="restPun"></strong>
+      <span class="rest-next" id="restNext"></span>
+    </div>
+  </div>
+  <!-- when I'm at a gym: the yellow "right now" banner -->
+  <section class="live" id="live" aria-live="polite">
+    <div class="pulse"><i></i>right now</div>
+    <strong id="liveGym">At Superblock</strong>
+    <span class="until" id="liveUntil">until about 21:30, come by</span>
+    <span class="plan" id="livePlan" hidden></span>
+  </section>
+
+  <section class="section" id="nextSessions" aria-labelledby="sessionsTitle">
+    <h2 id="sessionsTitle">Next sessions</h2>
+    <div class="sessions" id="sessions"><p class="loading">Loading sessions…</p></div>
+    <nav class="pager" id="pager" aria-label="More sessions">
+      <button type="button" class="pg-btn" id="pgPrev">‹ Earlier</button>
+      <span class="pg-count" id="pgCount" aria-live="polite"></span>
+      <button type="button" class="pg-btn" id="pgNext">Later ›</button>
+    </nav>
+
+  </section>
+
+  <section class="section" id="pitch" aria-labelledby="askTitle">
+    <div class="panel">
+      <h2 id="askTitle">Pitch me a session</h2>
+      <p class="sub">Pick a gym and a day. Every level is welcome, I still fall off the easy ones. If it works for me, it shows up here for others too.</p>
+      <div class="stack">
+        <select id="askGym" aria-label="Gym"></select>
+        <div class="err" id="askGymErr"></div>
+        <div id="askNextRow"><button class="btn btn-next" id="askNext">Pick a day <span class="nx" aria-hidden="true">→</span></button></div>
+        <div class="cal ask-loading" id="askLoading" hidden></div>
+        <div class="ask-more" id="askMore" hidden>
+        <div class="date-row">
+          <div class="cal" id="askCal" role="group" aria-label="Pick a day"></div>
+          <div class="chips" id="askWhen" role="group" aria-label="Time of day"></div>
+        </div>
+        <textarea id="askNote" maxlength="400" placeholder="Anything else? A time that suits you, a friend tagging along, snack requests"></textarea>
+        <div class="fields">
+          <input type="text" id="askName" maxlength="40" placeholder="First name" autocomplete="given-name">
+          <input type="email" id="askEmail" maxlength="200" placeholder="Email, so I can say yes" autocomplete="email">
+        </div>
+        <div class="err" id="askErr"></div>
+        <div><button class="btn" id="askBtn">Pitch it</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ping" id="ping" aria-label="Get a ping about new sessions">
+    <p>Want a ping when I add a session?</p>
+    <div class="inline">
+      <input type="email" id="notifyEmail" maxlength="200" placeholder="you@example.com" autocomplete="email" aria-label="Email">
+      <button class="btn" id="notifyBtn">Ping me</button>
+    </div>
+    <div class="err" id="notifyErr"></div>
+    <a class="other-invite" id="otherInvite" href="#" hidden>
+      <span class="oi-emoji" aria-hidden="true">🍻</span>
+      <span><b>Allergic to chalk?</b><small>There's a version without the falling part: food, drinks or sport.</small></span>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+    <p class="privacy" id="privacy">Only first names on here, emails stay with me, and every email has an exit. No hidden grades.</p>
+  </section>
+
+  <section class="host" id="host" aria-labelledby="hostTitle">
+    <div class="host-header">
+      <button type="button" class="host-toggle" id="hostToggle" aria-expanded="true" aria-controls="hostBody">
+        <span class="host-head"><span id="hostTitle">I'm at the gym</span><span class="host-status" id="hostStatus"></span></span>
+        <span class="chev" aria-hidden="true">⌄</span>
+      </button>
+      <a class="dash-pill" id="dashLink" href="#">Dashboard</a>
+    </div>
+    <div class="host-body" id="hostBody">
+    <p class="only-you">Only you see this. <button type="button" class="forget-admin" id="forgetAdmin">Forget admin on this device</button></p>
+    <div class="stack">
+      <div class="host-session" id="hostSession" hidden></div>
+      <select id="hostGym" aria-label="Gym"></select>
+      <p class="host-label">How long?</p>
+      <div class="chips" id="hostHours" role="group" aria-label="For how long"></div>
+      <input type="time" id="hostUntil" class="host-until" aria-label="Until" hidden>
+      <p class="host-label">Today's plan <span>(optional)</span></p>
+      <div class="chips" id="hostEffort" role="group" aria-label="Planned effort"></div>
+      <div class="row-actions">
+        <button class="btn" id="hostIn">I'm here</button>
+        <button class="btn ghost" id="hostOut">I've left</button>
+      </div>
+      <div class="err" id="hostErr"></div>
+    </div>
+    </div>
+  </section>
+
+  </div>
+
+  <footer id="footer">
+    <span>Powered by <a href="https://click-capybara.com" target="_blank" rel="noopener">Click-Capybara</a></span>
+    <span class="legal"><a href="privacy.html" class="privacy-link">Datenschutz</a><a href="rechtliches.html#impressum">Impressum</a></span>
+  </footer>
+</main>
+
+<!-- ═══ ADMIN DASHBOARD (only with ?admin=KEY&view=dashboard) ═══ -->
+<main class="wrap dash" id="dash" hidden>
+  <div class="dash-top">
+    <a class="dash-back" id="dashBack" href="#">‹ Back to the page</a>
+    <button type="button" class="pg-btn" id="dashRefresh">Refresh</button>
+  </div>
+  <h1 class="dash-title">Dashboard</h1>
+  <p class="dash-sub" id="dashSub">Loading…</p>
+
+  <div data-tab="overview">
+  <div class="stats" id="dashStats"></div>
+
+  <section class="dash-sec">
+    <h2>Your visits</h2>
+    <div class="stats" id="visitStats"></div>
+    <div id="visitList"></div>
+    <button type="button" class="pg-btn" id="visitMore" style="margin-top:10px" hidden>Show more</button>
+  </section>
+  </div>
+
+  <section class="dash-sec" data-tab="whosin">
+    <h2>Who's in</h2>
+    <div id="dashSessions"></div>
+    <nav class="pager" id="dashPager" aria-label="More sessions">
+      <button type="button" class="pg-btn" id="dPrev">‹ Earlier</button>
+      <span class="pg-count" id="dCount" aria-live="polite"></span>
+      <button type="button" class="pg-btn" id="dNext">Later ›</button>
+    </nav>
+  </section>
+
+  <section class="dash-sec" data-tab="pitches">
+    <h2>Pitches</h2>
+    <div id="dashPitches"></div>
+  </section>
+
+  <section class="dash-sec" data-tab="pings">
+    <div class="dash-sec-head">
+      <h2>Ping list</h2>
+      <button type="button" class="pg-btn" id="copySubs">Copy active emails</button>
+    </div>
+    <div class="chips" id="subFilter" role="group" aria-label="Filter by status"></div>
+    <div id="dashSubs"></div>
+  </section>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   INK — the rising-paint fill on the yellow buttons (same engine as the invite pages).
+   Ink.attach(element, 'brush' | 'splash' | 'drip') adds a yellow (or,
+   on #yes, charcoal) copy of the element's content on top, revealed
+   through a mask that's recalculated every screen refresh. The fill is
+   steered by measured coverage, so it grows evenly and ends firmly.
+   Ink.wait(element) = ms until that element is fully inked (use it as
+   the delay before moving to the next screen).
+   ═══════════════════════════════════════════════════════════════ */
+const Ink = (() => {
+  const canHover = window.matchMedia('(hover: hover)').matches;
+  // ✏️ fill speed in ms. Phones get more time: a tap is over in an instant,
+  //    so the ink needs longer to actually be seen. Hover can be quicker.
+  const DUR_IN = canHover ? 540 : 820, DUR_OUT = canHover ? 400 : 450;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const idle = window.requestIdleCallback || (fn => setTimeout(fn, 200));
+  const HIDDEN = 'linear-gradient(transparent, transparent)';
+
+  const rng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const clamp01 = t => t < 0 ? 0 : t > 1 ? 1 : t;
+  const easeOut = t => 1 - Math.pow(1 - clamp01(t), 1.7);
+  const fillCurve = p => Math.pow(p, 1.15);
+
+  function plan(style, w, h, seed) {
+    const r = rng(seed), shapes = [], diag = Math.hypot(w, h);
+    if (style === 'splash') {
+      const ox = w * (0.05 + r() * 0.2), oy = h * (0.6 + r() * 0.35);
+      const n = Math.max(18, Math.min(48, Math.round(w * h / 1400)));
+      for (let i = 0; i < n; i++) {
+        const x = -0.05 * w + r() * 1.1 * w, y = -0.1 * h + r() * 1.2 * h;
+        const d = Math.hypot(x - ox, y - oy) / diag;
+        shapes.push({ k: 'c', x, y, a: d * 0.55 + r() * 0.1, len: 0.38, R: diag * (0.12 + r() * 0.12) });
+      }
+      for (let i = 0; i < 14; i++) {
+        const ang = r() * Math.PI * 2, dist = diag * (0.1 + r() * 0.35);
+        shapes.push({ k: 'c', x: ox + Math.cos(ang) * dist, y: oy + Math.sin(ang) * dist * 0.6, a: r() * 0.3, len: 0.15, R: 1.5 + r() * 3 });
+      }
+    } else if (style === 'brush') {
+      const rows = Math.max(3, Math.round(h / 22));
+      for (let i = 0; i < rows; i++) {
+        const rad = h / rows * 0.62 + r() * 2;
+        shapes.push({ k: 'stroke', y: (i + 0.5) * h / rows, rad, dir: i % 2 ? -1 : 1, W: w + 2 * rad,
+                      a: i * (0.45 / rows) + r() * 0.04, len: 0.5 });
+      }
+    } else {
+      const cols = Math.max(7, Math.round(w / 18));
+      // evenly spread start times (shuffled), so columns rise one after another
+      const order = [...Array(cols).keys()].sort(() => r() - 0.5);
+      for (let i = 0; i < cols; i++) {
+        const cw = w / cols * (1.35 + r() * 0.35);
+        shapes.push({ k: 'drip', x: (i + 0.5) * w / cols, cw, a: order[i] / cols * 0.35 + r() * 0.03,
+                      len: 0.55 + r() * 0.15, H: h + 2 * cw, h });
+      }
+    }
+    return shapes;
+  }
+
+  function covers(s, t, x, y) {
+    if (s.k === 'c') return Math.hypot(x - s.x, y - s.y) <= s.R * t;
+    if (s.k === 'stroke') {
+      const L = s.W * t, x0 = s.dir > 0 ? -s.rad : (s.W - s.rad) - L, tipX = s.dir > 0 ? x0 + L : x0;
+      return (x >= x0 && x <= x0 + L && Math.abs(y - s.y) <= s.rad) || Math.hypot(x - tipX, y - s.y) <= s.rad;
+    }
+    // 'drip' rises from the bottom (like a glass filling up), rounded top
+    const half = s.cw / 2, top = s.h + half - s.H * t;   // head centre: starts half a column below the edge
+    return (Math.abs(x - s.x) <= half && y >= top) || Math.hypot(x - s.x, y - top) <= half;
+  }
+
+  /* When (as shape growth t, 0..1) does shape s first cover point (x, y)?
+     Exact formulas for the simple shapes; a short binary search for the
+     rest (hearts). Infinity = this shape never reaches the point. */
+  function need(s, x, y, w, h) {
+    if (s.k === 'c') return Math.hypot(x - s.x, y - s.y) / s.R;
+    if (s.k === 'soft') return Math.hypot(x - s.x, y - s.y) / (s.R * 0.8);
+    if (s.k === 'stroke') {
+      const dy = Math.abs(y - s.y);
+      if (dy > s.rad) return Infinity;
+      const reach = Math.sqrt(s.rad * s.rad - dy * dy);
+      const L = s.dir > 0 ? x + s.rad - reach : s.W - s.rad - x - reach;
+      return Math.max(0, L) / s.W;
+    }
+    if (s.k === 'drip') {                // rising column with a round head
+      const dx = Math.abs(x - s.x), half = s.cw / 2;
+      if (dx > half) return Infinity;
+      return Math.max(0, s.h + half - y - Math.sqrt(half * half - dx * dx)) / s.H;
+    }
+    if (!covers(s, 1, x, y, w, h)) return Infinity;
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 12; i++) { const m = (lo + hi) / 2; if (covers(s, m, x, y, w, h)) hi = m; else lo = m; }
+    return hi;
+  }
+
+  /* Coverage → progress lookup table. For every sample point we compute
+     the moment it gets covered, sort those moments, and read off the
+     quantiles: lut[c] = raw progress at which c % of the card is inked.
+     Animating through it makes the VISIBLE fill grow evenly. This is a
+     direct calculation (no frame-by-frame simulation), so it's cheap. */
+  function buildLUT(shapes, w, h) {
+    const gx = Math.min(64, Math.max(26, Math.round(w / 4)));
+    const gy = Math.min(32, Math.max(13, Math.round(h / 3)));
+    const times = [];
+    for (let j = 0; j < gy; j++) {
+      const y = (j + 0.5) * h / gy;
+      for (let i = 0; i < gx; i++) {
+        const x = (i + 0.5) * w / gx;
+        let best = Infinity;
+        for (const s of shapes) {
+          const t = need(s, x, y, w, h);
+          if (t > 1) continue;
+          const q = s.a + s.len * (1 - Math.pow(1 - t, 1 / 1.7));   // inverse of easeOut
+          if (q < best) best = q;
+        }
+        if (best !== Infinity) times.push(best);
+      }
+    }
+    times.sort((a, b) => a - b);
+    const n = times.length, lut = [0];
+    for (let k = 1; k <= 100; k++) {
+      if (!n) { lut.push(k / 100); continue; }
+      const f = k / 100 * (n - 1), i = Math.floor(f);
+      lut.push(times[i] + (times[Math.min(n - 1, i + 1)] - times[i]) * (f - i));
+    }
+    return lut;
+  }
+
+  function qFor(el, c) {
+    const f = clamp01(c) * 100, i = Math.floor(f), lut = el._lut;
+    return i >= 100 ? lut[100] : lut[i] + (lut[i + 1] - lut[i]) * (f - i);
+  }
+
+  function maskFor(el, p) {
+    const layers = [], q = qFor(el, fillCurve(p)), f = n => n.toFixed(1);
+    for (const s of el._shapes) {
+      const t = easeOut((q - s.a) / s.len);
+      if (t <= 0) continue;
+      if (s.k === 'c') {
+        layers.push(`radial-gradient(circle at ${f(s.x)}px ${f(s.y)}px, #000 ${f(s.R * t)}px, transparent ${f(s.R * t + 0.8)}px)`);
+      } else if (s.k === 'stroke') {
+        const L = s.W * t, x0 = s.dir > 0 ? -s.rad : (s.W - s.rad) - L, tipX = s.dir > 0 ? x0 + L : x0;
+        layers.push(`linear-gradient(#000, #000) ${f(x0)}px ${f(s.y - s.rad)}px / ${f(L)}px ${f(2 * s.rad)}px no-repeat`);
+        layers.push(`radial-gradient(circle at ${f(tipX)}px ${f(s.y)}px, #000 ${f(s.rad)}px, transparent ${f(s.rad + 0.8)}px)`);
+      } else {
+        const half = s.cw / 2, top = s.h + half - s.H * t;
+        if (top < s.h) layers.push(`linear-gradient(#000, #000) ${f(s.x - half)}px ${f(top)}px / ${f(s.cw)}px ${f(s.h - top + 1)}px no-repeat`);
+        layers.push(`radial-gradient(circle at ${f(s.x)}px ${f(top)}px, #000 ${f(half)}px, transparent ${f(half + 0.8)}px)`);
+      }
+    }
+    // last stretch: fade in a full layer, so leftover soft rims / tiny gaps
+    // blend into "full" instead of snapping in a single frame
+    if (p > 0.82) {
+      const o = Math.pow((p - 0.82) / 0.18, 1.5).toFixed(3);
+      layers.push(`linear-gradient(rgba(0,0,0,${o}), rgba(0,0,0,${o}))`);
+    }
+    return layers.length ? layers.join(',') : HIDDEN;
+  }
+
+  function paint(el) {
+    const full = el._p >= 0.995;
+    const m = full ? 'none' : el._p <= 0 ? HIDDEN : maskFor(el, el._p);   // full → no mask at all
+    el._top.style.webkitMask = m;
+    el._top.style.mask = m;
+    el.classList.toggle('ink-full', full);
+  }
+
+  function ensurePlan(el) {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return false;          // not on screen yet
+    const key = Math.round(r.width) + 'x' + Math.round(r.height);
+    if (el._planKey !== key) {
+      el._shapes = plan(el._style, r.width, r.height, el._seed);
+      el._lut = buildLUT(el._shapes, r.width, r.height);
+      el._planKey = key;
+    }
+    return true;
+  }
+
+  function go(el, target) {
+    if (!el._top) return;
+    el._target = target;
+    if (reduceMotion || !ensurePlan(el)) { el._p = target; paint(el); return; }
+    if (el._raf) return;
+    let last = performance.now();
+    const step = now => {
+      const dt = now - last; last = now;
+      const dir = Math.sign(el._target - el._p);
+      el._p = clamp01(el._p + dir * dt / (dir > 0 ? DUR_IN : DUR_OUT));
+      if ((dir > 0 && el._p > el._target) || (dir < 0 && el._p < el._target)) el._p = el._target;
+      paint(el);
+      el._raf = el._p !== el._target ? requestAnimationFrame(step) : null;
+    };
+    el._raf = requestAnimationFrame(step);
+  }
+
+  let seedCounter = 97;
+  function attach(el, style) {
+    if (el._top) return el;
+    el._style = style;
+    el._seed = (seedCounter = (seedCounter * 48271) % 2147483647);
+    el._p = 0;
+    el.classList.add('ink');
+    const top = document.createElement('span');
+    top.className = 'ink-top';
+    top.setAttribute('aria-hidden', 'true');
+    top.innerHTML = el.innerHTML;
+    el.appendChild(top);
+    el._top = top;
+    paint(el);
+    if (canHover) {
+      el.addEventListener('mouseenter', () => go(el, 1));
+      el.addEventListener('mouseleave', () => { if (!el.classList.contains('selected')) go(el, 0); });
+    }
+    el.addEventListener('click', () => {
+      go(el, 1);
+      // siblings that just lost "selected" pour their ink back out
+      if (el.parentElement) [...el.parentElement.children].forEach(o => {
+        if (o !== el && o._top && !o.classList.contains('selected')) go(o, 0);
+      });
+    });
+    idle(() => ensurePlan(el));     // measure ahead of the first tap when possible
+    // …and again whenever it appears / changes size (e.g. its screen opens)
+    if (window.ResizeObserver) new ResizeObserver(() => idle(() => ensurePlan(el))).observe(el);
+    return el;
+  }
+
+  // ms until el is fully inked — use as the delay before leaving the screen
+  const wait = el => reduceMotion || !el || !el._top ? 120 : Math.round((1 - el._p) * DUR_IN) + 40;
+
+  return { attach, go, wait };
+})();
+</script>
+<script>
+(function () {
+  /* ═══════════════════════════════════════════════════════════════
+     ✏️ SETTINGS
+     ═══════════════════════════════════════════════════════════════ */
+
+  // Whose page is this? Every person's link carries ?c=<their deployment id>,
+  // created by the setup panel in their own copy of the Google Sheet.
+  // ?c=demo shows made-up data. No ?c at all shows the landing page.
+  const CODE = (new URLSearchParams(location.search).get('c') || '').trim();
+  const ENDPOINT = /^[\w-]{20,}$/.test(CODE) ? 'https://script.google.com/macros/s/' + CODE + '/exec' : (CODE === 'demo' ? 'DEMO' : '');
+  const NS = 'apaf:' + CODE + ':';            // device storage is kept per person
+  const LATEST_BACKEND = 1;                   // Code.gs version this page expects
+
+  // your first name (empty = no name shown). photo: put e.g. me.jpg into
+  // this repo and write photo: 'me.jpg' — until then the 🧗 shows.
+  const HOST = { name: '', photo: '' };       // filled from the person's settings
+
+  // gyms for "another gym?" and your "I'm at the gym" switch.
+  // address = used for the map link and the calendar location.
+  // default gyms (demo); a real page gets the person's own list from their settings
+  let GYMS = [
+    { location: 'Düsseldorf', gyms: [
+      { name: 'Superblock',            address: 'Fichtenstraße 53, 40233 Düsseldorf' },
+      { name: 'Einstein Düsseldorf',   address: 'Lierenfelder Str. 49, 40231 Düsseldorf' },
+      { name: 'Monkeyspot Düsseldorf', address: 'Schiessstraße 52, 40549 Düsseldorf' }
+    ]},
+    { location: 'Duisburg', gyms: [
+      { name: 'Monkeyspot Duisburg',   address: 'Neuenhofstraße 91, 47055 Duisburg' },
+      { name: 'Stuntwerk Duisburg',    address: 'Neudorfer Str. 109-113, 47057 Duisburg' },
+      { name: 'Einstein Duisburg',     address: 'Essenberger Straße 85, 47059 Duisburg' }
+    ]},
+    { location: 'Wuppertal', gyms: [
+      { name: 'Prisma',                address: 'Vohwinkeler Straße 119, 42329 Wuppertal' }
+    ]},
+    { location: 'Köln', gyms: [
+      { name: 'Boulderplanet',         address: 'Oskar-Jäger-Straße 143h, 50825 Köln' }
+    ]},
+    { location: 'Dortmund', gyms: [
+      { name: 'Boulderwelt Dortmund',  address: 'Brennaborstraße 10, 44149 Dortmund' },
+      { name: 'Kletterhalle Bergwerk', address: 'Emscherallee 33, 44369 Dortmund' }
+    ]}
+  ];
+
+  // the time-of-day chips next to the date picker in "Pitch me a session"
+  const WHEN_OPTIONS = ['Morning', 'Afternoon', 'Evening'];
+  // ✏️ link at the bottom to your friends invite (hidden until you set it)
+  let FRIENDS_INVITE_URL = '';               // from the person's settings
+
+  // ✏️ your check-in options (admin panel)
+  const CHECKIN_HOURS = [1, 2, 3, 4, 5];               // + "until…" with a time picker
+  const EFFORT_OPTIONS = ['warm-up', 'solid session', 'project mode', 'no skin left'];
+  const SESSIONS_PER_PAGE = 3;   // ✏️ how many sessions show at once
+  const MAX_PAGES = 5;           // ✏️ at most this many pages (3 × 5 = 15 sessions)
+  const PITCH_DAYS_AHEAD = 60;   // how far ahead people can pick a day
+
+  // ✏️ ALL THE WORDING in one place. {gym}, {time}, {names}, {n} get filled in.
+  const TEXT = {
+    title:      'Where my skin goes to die',
+    intro:      'I\'m at the wall most days anyway. Bring shoes, skin and questionable beta.',
+    liveTitle:  'Live at {gym}',
+    liveUntil:  'Doing weird things till ~{time}. ',    // (the "Directions" link follows)
+    livePlan:   'Today\'s plan: {effort}',
+    goingNone:  'Solo session so far. Ruin that.',
+    goingMeOnly:'You and me so far',
+    goingFew:   '{names} are in',                       // 1–3 people
+    goingOne:   '{names} is in',
+    goingMany:  '{names} and {n} others. It\'s getting crowded on the mats.',
+    joined:     'You\'re on the list. Don\'t flake, the wall remembers.',
+    cantMake:   'Skin needs a break',
+    emptyList:  'Nothing planned yet. My forearms are on vacation. Pitch me a day below.',
+    pitchSent:  'Pitch received. Answer coming by email, probably with a gif.',
+    confirmMail:'Check your inbox and confirm. One more click, GDPR says hi.',
+    alreadyOn:  'You\'re already on the list.',
+    // while the page loads (rotates every ~1.3 s)
+    loading:    ['Chalking up…', 'Finding my shoes…', 'Reading the beta…', 'Brushing the holds…', 'Checking my skin…'],
+
+    // shown under the sessions when I'm not at a gym — one per day, rotating
+    restPuns: [
+      'My forearms filed a formal complaint.',
+      'Currently horizontal. Skin is regenerating.',
+      'Off the wall. Probably napping like a capybara.',
+      'Chalk dust settling, ego recovering.',
+      'Fingers in airplane mode.',
+      'Watching beta videos instead of climbing. Very productive.',
+      'Pretending recovery is a personality trait.',
+      'Not at the gym. My hyperfocus found a new hobby for today.',
+      'Grip strength: buffering.'
+    ],
+    restNext:   'Back on the wall {when} at {gym}.',
+    restNone:   'Next session not planned yet. Pitch me one below.',
+    calHint:    'Dots: I\'m already climbing. Faded: my calendar says no.',
+    joinBtn:    'Chalk me up',
+    sendInvite: 'Send me the invite',
+    charging:   'recharging {pct}%',
+    chargingNone: 'recharging forever',
+    partBusy:   'busy'
+  };
+  const fill = (t, v) => t.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  const $ = id => document.getElementById(id);
+  const DEMO = ENDPOINT === 'DEMO';
+  if (!ENDPOINT) {                            // plain address: show the landing page instead
+    document.documentElement.classList.add('is-landing');
+    $('page').hidden = true; $('landing').hidden = false;
+    let last = null; try { last = JSON.parse(localStorage.getItem('apaf:last') || 'null'); } catch (e) {}
+    if (last && last.c) { $('lastPage').hidden = false; $('lastPage').href = '?c=' + encodeURIComponent(last.c); $('lastName').textContent = last.name ? last.name + '\u2019s' : 'your last'; }
+    return;
+  }
+  document.documentElement.classList.add('awaiting');   // hide the header until the person's texts are in
+  try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: '' })); } catch (e) {}
+  document.querySelectorAll('.privacy-link').forEach(a => { a.href = 'privacy.html?c=' + encodeURIComponent(CODE); });
+  const params = new URLSearchParams(location.search);
+  // Admin key: from the link (?admin=…) — and remembered on this device, so
+  // the installed app (which always opens the plain start address) still
+  // shows your admin panel. "Forget admin on this device" removes it.
+  if (params.get('admin')) { try { localStorage.setItem(NS + 'admin', params.get('admin')); } catch (e) {} }
+  const ADMIN_KEY = params.get('admin') || (() => { try { return localStorage.getItem(NS + 'admin') || ''; } catch (e) { return ''; } })();
+  const store = {
+    get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } },
+    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  let myJoins = store.get(NS + 'joins', {});           // sessionId → token
+  let me = store.get(NS + 'me', { name: '', email: '' });
+  let feedData = null, feedTried = false;   // feedTried: first load finished (worked or not)
+
+  let allGyms = GYMS.flatMap(g => g.gyms);
+  const findGym = name => allGyms.find(g => g.name === name);
+  const mapsUrl = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+
+  function setupOtherInvite() {
+    $('otherInvite').hidden = !FRIENDS_INVITE_URL;
+    if (!FRIENDS_INVITE_URL || $('otherInvite')._wired) return;
+    $('otherInvite')._wired = true;
+    $('otherInvite').href = FRIENDS_INVITE_URL;
+    Ink.attach($('otherInvite'), 'splash');
+    // let the splash finish before leaving (a tap on a phone is over instantly)
+    $('otherInvite').addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      const href = $('otherInvite').href;
+      setTimeout(() => { location.href = href; }, Ink.wait($('otherInvite')));
+    });
+  }
+  setupOtherInvite();
+
+  /* ---------- top ---------- */
+  function drawTop() {
+    $('title').textContent = TEXT.title;
+    document.title = (HOST.name ? HOST.name + ' · ' : '') + 'A Place About Falling';
+    $('intro').textContent = TEXT.intro;
+    $('intro').hidden = !TEXT.intro;
+    if (HOST.name) {
+      $('helloLine').textContent = `Oi! ☀️ I'm ${HOST.name}, nice to meet you on the wall`;
+      $('avatar').textContent = HOST.name[0].toUpperCase();
+    }
+  }
+  drawTop();
+
+  // the person's own settings arrive with the first feed
+  let profileKey = '';
+  function applyProfile(p) {
+    if (!p) return;
+    const key = JSON.stringify(p);
+    if (key === profileKey) return;            // nothing changed since the last refresh
+    profileKey = key;
+    window.APAF_PROFILE = p;
+    if (p.title) TEXT.title = p.title;
+    TEXT.intro = p.intro || '';
+    HOST.name = p.name || '';
+    FRIENDS_INVITE_URL = /^https:\/\//.test(p.hangoutUrl || '') ? p.hangoutUrl : '';
+    if (p.gyms && p.gyms.length) {
+      GYMS = p.gyms; allGyms = GYMS.flatMap(g => g.gyms);
+      [['askGym', true], ['hostGym', false]].forEach(([id, ph]) => {
+        const sel = $(id), was = sel.value;
+        if (!sel.options.length) return;       // host select only exists for the admin
+        sel.innerHTML = ''; fillGymSelect(sel, ph);
+        if ([...sel.options].some(o => o.value === was)) sel.value = was;
+      });
+    }
+    drawTop(); setupOtherInvite();
+    try { localStorage.setItem('apaf:last', JSON.stringify({ c: CODE, name: HOST.name })); } catch (e) {}
+    document.dispatchEvent(new CustomEvent('apaf:profile', { detail: p }));
+  }
+  if (HOST.photo) {
+    const img = new Image();
+    img.alt = '';
+    img.onload = () => { $('avatar').textContent = ''; $('avatar').appendChild(img); };
+    img.src = HOST.photo;
+  }
+
+  /* ---------- talking to Code.gs (or demo data) ---------- */
+  async function getFeed() {
+    if (DEMO) return demoFeed();
+    const r = await fetch(ENDPOINT + '?action=feed', { cache: 'no-store' });
+    return r.json();
+  }
+  async function post(data) {
+    if (DEMO) { await new Promise(r => setTimeout(r, 600)); return { ok: true, token: 'demo-' + Date.now() }; }
+    // text/plain keeps the request "simple", so no CORS preflight to Apps Script
+    const r = await fetch(ENDPOINT, { method: 'POST', body: JSON.stringify(data) });
+    return r.json();
+  }
+  function demoFeed() {
+    const day = (d, h, m) => { const x = new Date(); x.setDate(x.getDate() + d); x.setHours(h, m || 0, 0, 0); return x.getTime(); };
+    const nextDow = (dow) => (dow - new Date().getDay() + 7) % 7 || 7;
+    const sb = 'Superblock, Fichtenstraße 53, 40233 Düsseldorf';
+    return {
+      v: LATEST_BACKEND,
+      profile: { name: 'Max', title: 'Where my skin goes to die', intro: 'I\'m at the wall most days anyway. Bring shoes, skin and questionable beta.',
+                 gyms: GYMS, hangoutUrl: 'https://mamfredm.github.io/hangout/', contact: { name: 'Max Mustermann', email: 'max@example.com' } },
+      now: { gym: 'Superblock', location: sb, until: Date.now() + 100 * 60000 },
+      sessions: [
+        { id: 'd1', start: day(nextDow(1), 19), end: day(nextDow(1), 21, 30), gym: 'Superblock', location: sb, label: 'Monday crew', going: ['Tom', 'Lisa', 'Jan'] },
+        { id: 'd2', start: day(nextDow(3), 19, 30), end: day(nextDow(3), 22), gym: 'Superblock', location: sb, label: 'Wednesday crew', going: ['Mo', 'Sara'] },
+        { id: 'd3', start: day(nextDow(6), 11), end: day(nextDow(6), 13, 30), gym: 'Einstein Düsseldorf', location: 'Einstein Düsseldorf, Lierenfelder Str. 49, 40231 Düsseldorf', label: 'Open session', going: [] }
+      ],
+      availability: (() => {        // fake free/busy: some busy evenings, one fully booked day
+        const out = {}, k = d => { const x = new Date(); x.setDate(x.getDate() + d);
+          return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+        [2, 9, 16].forEach(d => out[k(d)] = 'e');
+        [3, 4].forEach(d => out[k(d)] = 'ma');
+        out[k(11)] = 'mae'; out[k(12)] = 'mae';
+        return out;
+      })()
+    };
+  }
+
+  /* ---------- formatting ---------- */
+  const fmtTime = t => new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+  function dayParts(t) {
+    const d = new Date(t), today = Date.now();
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    const wd = sameDay(t, today) ? 'Today' : sameDay(t, tomorrow) ? 'Tmrw' : d.toLocaleDateString('en-GB', { weekday: 'short' });
+    return { num: d.getDate(), wd, month: d.toLocaleDateString('en-GB', { month: 'long' }) };
+  }
+  function goingText(names, mine) {
+    const list = names.slice();
+    if (!list.length) return mine ? TEXT.goingMeOnly : TEXT.goingNone;
+    if (list.length === 1) return fill(TEXT.goingOne, { names: list[0] });
+    if (list.length <= 3) return fill(TEXT.goingFew, { names: list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1] });
+    return fill(TEXT.goingMany, { names: list.slice(0, 2).join(', '), n: list.length - 2 });
+  }
+
+  /* ---------- live banner ---------- */
+  function renderLive(now, list) {
+    const el = $('live');
+    renderRest(now ? null : (list || []));
+    if (!now) { el.classList.remove('on'); return; }
+    $('liveGym').textContent = fill(TEXT.liveTitle, { gym: now.gym });
+    const until = $('liveUntil');
+    until.textContent = fill(TEXT.liveUntil, { time: fmtTime(now.until), gym: now.gym });
+    const a = document.createElement('a');
+    a.href = mapsUrl(now.location || now.gym);
+    a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = 'Directions';
+    until.appendChild(a);
+    $('livePlan').hidden = !now.effort;
+    if (now.effort) $('livePlan').textContent = fill(TEXT.livePlan, { effort: now.effort });
+    el.classList.add('on');
+  }
+
+  // rest-day card: a pun that changes once a day, plus when I'm back on the wall
+  function renderRest(list) {
+    const el = $('rest');
+    if (!list) { el.classList.remove('on'); return; }
+    const dayNo = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+    $('restPun').textContent = TEXT.restPuns[dayNo % TEXT.restPuns.length];
+    const next = list.find(x => x.start > Date.now());
+    $('restNext').textContent = next
+      ? fill(TEXT.restNext, {
+          when: new Date(next.start).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ', ' + fmtTime(next.start),
+          gym: next.gym })
+      : TEXT.restNone;
+    el.classList.add('on');
+
+    // battery: the closer the next session, the fuller (72 h of rest = empty)
+    const lvl = $('batteryLvl');
+    if (next) {
+      const charge = Math.min(0.98, Math.max(0.08, 1 - (next.start - Date.now()) / (72 * 3600000)));
+      const pct = Math.round(charge * 100);
+      lvl.classList.remove('loop');
+      lvl.style.setProperty('--c', charge < 0.34 ? '#ff5a4e' : charge < 0.67 ? '#fcba01' : '#1fae5b');
+      // charge up visibly — but only once the card is actually on screen
+      const fillUp = () => { lvl.style.width = pct + '%'; };
+      if (lvl.dataset.charged) fillUp();
+      else if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+          if (entries.some(e => e.isIntersecting)) { io.disconnect(); lvl.dataset.charged = '1'; setTimeout(fillUp, 250); }
+        }, { threshold: 0.6 });
+        io.observe($('rest'));
+      } else { lvl.dataset.charged = '1'; requestAnimationFrame(() => requestAnimationFrame(fillUp)); }
+      $('chargeText').textContent = fill(TEXT.charging, { pct });
+    } else {
+      lvl.style.width = '';
+      lvl.classList.add('loop');
+      $('chargeText').textContent = TEXT.chargingNone;
+    }
+  }
+
+  /* ---------- sessions ---------- */
+  let page = 0;
+  function renderSessions(list) {
+    const box = $('sessions');
+    box.innerHTML = '';
+    list = list.slice(0, SESSIONS_PER_PAGE * MAX_PAGES);
+    const pages = Math.max(1, Math.ceil(list.length / SESSIONS_PER_PAGE));
+    page = Math.min(page, pages - 1);           // e.g. after sessions passed
+    $('pager').classList.toggle('on', pages > 1);
+    $('pgCount').textContent = `${page + 1} / ${pages}`;
+    $('pgPrev').disabled = page === 0;
+    $('pgNext').disabled = page >= pages - 1;
+    list = list.slice(page * SESSIONS_PER_PAGE, (page + 1) * SESSIONS_PER_PAGE);
+    if (!list.length) {
+      const e = document.createElement('div');
+      e.className = 'empty-state';
+      e.textContent = TEXT.emptyList;
+      box.appendChild(e);
+      return;
+    }
+    list.forEach(s => box.appendChild(sessionCard(s)));
+  }
+
+  function sessionCard(s) {
+    const mine = !!myJoins[s.id];
+    const d = dayParts(s.start);
+    const card = document.createElement('article');
+    card.className = 'session' + (sameDay(s.start, Date.now()) ? ' today' : '') + (mine ? ' mine' : '');
+    card.innerHTML = `
+      <div class="day" aria-hidden="true"><b></b><span></span></div>
+      <div>
+        <div class="time"></div>
+        <div class="gym"><a target="_blank" rel="noopener"></a></div>
+        <div class="label"></div>
+        <div class="going"></div>
+        <div class="row-actions"></div>
+      </div>
+      <form class="join-form" novalidate>
+        <div class="fields">
+          <input type="text" name="name" maxlength="40" placeholder="First name" autocomplete="given-name" aria-label="First name">
+          <input type="email" name="email" maxlength="200" placeholder="Email for the invite" autocomplete="email" aria-label="Email">
+        </div>
+        <label class="consent"><input type="checkbox" name="ok">Send me a calendar invite for this. My email stays with me, no spam, pinky promise.</label>
+        <div class="err"></div>
+        <div><button class="btn" type="submit">Send me the invite</button></div>
+      </form>`;
+    card.querySelector('.day b').textContent = d.num;
+    card.querySelector('.day span').textContent = d.wd;
+    card.querySelector('.time').textContent = `${fmtTime(s.start)}–${fmtTime(s.end)}`;
+    card.setAttribute('aria-label', `${d.wd} ${d.num} ${d.month}, ${fmtTime(s.start)} at ${s.gym}`);
+    const gymLink = card.querySelector('.gym a');
+    gymLink.textContent = s.gym;
+    gymLink.href = mapsUrl(s.location || s.gym);
+    const label = card.querySelector('.label');
+    if (s.label) label.textContent = s.label; else label.remove();
+
+    const going = card.querySelector('.going');
+    going.textContent = goingText(s.going || [], mine);
+    if (!(s.going || []).length) going.classList.add('empty');
+
+    const actions = card.querySelector('.row-actions');
+    const form = card.querySelector('.join-form');
+    if (mine) {
+      actions.innerHTML = '<span class="you-going"></span><button class="link-btn" type="button"></button>';
+      actions.querySelector('.you-going').textContent = TEXT.joined;
+      actions.querySelector('button').textContent = TEXT.cantMake;
+      actions.querySelector('button').addEventListener('click', () => leaveSession(s, card));
+    } else {
+      const join = document.createElement('button');
+      join.className = 'btn';
+      join.type = 'button';
+      join.textContent = TEXT.joinBtn;
+      join.addEventListener('click', () => {
+        const open = form.classList.toggle('open');
+        join.textContent = open ? 'Close' : TEXT.joinBtn;
+        if (open) {
+          form.name.value = me.name; form.email.value = me.email;
+          (me.name ? form.querySelector('[type=submit]') : form.name).focus();
+        }
+      });
+      actions.appendChild(join);
+    }
+
+    form.addEventListener('submit', e => { e.preventDefault(); joinSession(s, form); });
+    Ink.attach(form.querySelector('[type=submit]'), 'drip');
+    return card;
+  }
+
+  async function joinSession(s, form) {
+    const err = form.querySelector('.err');
+    const name = form.name.value.trim(), email = form.email.value.trim();
+    if (!name) { err.textContent = 'Add your first name.'; return form.name.focus(); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That email doesn\'t look right.'; return form.email.focus(); }
+    if (!form.ok.checked) { err.textContent = 'Tick the box, otherwise the invite can\'t find you.'; return; }
+    err.textContent = '';
+    const btn = form.querySelector('[type=submit]');
+    btn.disabled = true;
+    const minWait = new Promise(r => setTimeout(r, Ink.wait(btn)));   // let the paint rise first
+    const res = await post({ action: 'join', sessionId: s.id, name, email }).catch(() => null);
+    await minWait;
+    btn.disabled = false;
+    if (!res || !res.ok) {
+      err.textContent = res && res.error === 'session_gone'
+        ? 'That session was just cancelled. Have a look at the others.'
+        : 'That didn\'t go through. Try again in a moment.';
+      return;
+    }
+    me = { name, email }; store.set(NS + 'me', me);
+    if (!$('askName').value) $('askName').value = name;        // reuse for the other forms
+    if (!$('askEmail').value) $('askEmail').value = email;
+    if ($('notifyEmail') && !$('notifyEmail').value) $('notifyEmail').value = email;
+    myJoins[s.id] = res.token; store.set(NS + 'joins', myJoins);
+    if (!res.already) s.going = (s.going || []).concat(name.split(' ')[0]);
+    const card = form.closest('.session');
+    const fresh = sessionCard(s);
+    card.replaceWith(fresh);
+    const note = document.createElement('p');
+    note.className = 'ok-note';
+    note.textContent = DEMO ? 'Demo mode: nothing was sent.' : 'Invite sent. Check your inbox.';
+    fresh.querySelector('.row-actions').after(note);
+  }
+
+  async function leaveSession(s, card) {
+    const res = await post({ action: 'leave', token: myJoins[s.id] }).catch(() => null);
+    if (!res) return;
+    const first = me.name.split(' ')[0];
+    const i = (s.going || []).indexOf(first);
+    if (i >= 0) s.going.splice(i, 1);
+    delete myJoins[s.id]; store.set(NS + 'joins', myJoins);
+    card.replaceWith(sessionCard(s));
+  }
+
+  function turnPage(delta) {
+    page += delta;
+    renderSessions((feedData && feedData.sessions) || []);
+    const top = $('sessionsTitle').getBoundingClientRect().top;
+    if (top < 0) $('sessionsTitle').scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+  $('pgPrev').addEventListener('click', () => turnPage(-1));
+  $('pgNext').addEventListener('click', () => turnPage(1));
+
+  /* ---------- gym selects + chips ---------- */
+  function fillGymSelect(sel, withPlaceholder) {
+    if (withPlaceholder) sel.add(new Option('Pick a gym', '', true, true));
+    if (withPlaceholder) sel.options[0].disabled = true;
+    GYMS.forEach(g => {
+      const og = document.createElement('optgroup');
+      og.label = g.location;
+      g.gyms.forEach(x => og.appendChild(new Option(x.name, x.name)));
+      sel.appendChild(og);
+    });
+    const other = document.createElement('optgroup');
+    other.label = 'Somewhere else';
+    other.appendChild(new Option('Another gym (tell me in the note)', 'Another gym'));
+    sel.appendChild(other);
+  }
+  function chips(box, options, initial) {
+    let value = initial;
+    const els = options.map(o => {
+      const c = document.createElement('button');
+      c.type = 'button'; c.className = 'chip'; c.textContent = o.label || o;
+      c.dataset.label = o.label || o;
+      c.setAttribute('aria-pressed', String((o.value ?? o) === value));
+      c.addEventListener('click', () => {
+        value = o.value ?? o;
+        box.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x === c)));
+      });
+      box.appendChild(c);
+      return c;
+    });
+    const get = () => value;
+    // disable some options (e.g. busy parts of a day); clears a selection that became busy
+    get.disable = indexes => els.forEach((c, i) => {
+      const off = indexes.includes(i);
+      c.disabled = off;
+      c.textContent = off ? `${c.dataset.label} (${TEXT.partBusy})` : c.dataset.label;
+      if (off && c.getAttribute('aria-pressed') === 'true') { c.setAttribute('aria-pressed', 'false'); value = null; }
+    });
+    return get;
+  }
+
+  /* ---------- ticket loader (same as the booking pass on the hangout page) ----------
+     A tilting, extruded ticket with pulsing letters and a block progress bar.
+     Colors come from the container: text color = ink, background = face. */
+  function ticketLoader(container, o) {
+    o = o || {};
+    const MAX_SKEW_DEG = 7, SWING_SECONDS = 2.4, GLITCH = 0.12, H = o.height || 230;
+    const word = String(o.word || 'LOADING').toUpperCase();
+    const font = o.font || "'Bungee', 'Avenir Next', Arial, sans-serif";
+    const canvas = document.createElement('canvas');
+    canvas.style.height = H + 'px';
+    container.setAttribute('role', 'status');
+    container.setAttribute('aria-label', o.label || 'Loading');
+    container.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cs = getComputedStyle(container), ink = cs.color, face = cs.backgroundColor;
+    let last = performance.now(), time = 0, raf = 0, stopped = false;
+
+    function draw(t) {
+      const w = canvas.clientWidth || 300, h = H, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+        canvas.width = Math.floor(w * dpr); canvas.height = Math.floor(h * dpr);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = ink; ctx.globalAlpha = 0.08; ctx.lineWidth = 1;    // graph-paper grid
+      for (let x = (w % 24) / 2; x < w; x += 24) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, h); ctx.stroke(); }
+      for (let y = (h % 24) / 2; y < h; y += 24) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(w, y + 0.5); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+
+      const skew = (reduce ? 0 : MAX_SKEW_DEG * Math.sin(t * 2 * Math.PI / SWING_SECONDS)) * Math.PI / 180;
+      const pitch = reduce ? 0.12 : Math.sin(t * 1.5) * 0.08 + 0.15;
+      const depth = Math.round(Math.min(18, h * 0.08));
+      const boxW = Math.min(w - 2 * depth - 24, 360), boxH = Math.min(124, h - 2 * depth - 40);
+      const bx = -boxW / 2 - depth / 2, by = -boxH / 2 - depth / 2;
+
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.transform(1, Math.tan(skew), 0, Math.cos(pitch), 0, 0);
+      ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+      for (let d = depth; d > 0; d -= 3) {
+        ctx.beginPath(); ctx.rect(bx + d, by + d, boxW, boxH);
+        if (d === depth) { ctx.fillStyle = ink; ctx.fill(); }
+        ctx.stroke();
+      }
+      ctx.fillStyle = face; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.rect(bx, by, boxW, boxH); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = ink;
+      [[bx - 3, by - 3], [bx + boxW - 7, by - 3], [bx - 3, by + boxH - 7], [bx + boxW - 7, by + boxH - 7]]
+        .forEach(p => ctx.fillRect(p[0], p[1], 10, 10));
+
+      const barW = boxW - 40, barH = 14, barX = bx + 20, barY = by + boxH - 30;
+      ctx.lineWidth = 2; ctx.strokeRect(barX, barY, barW, barH);
+      const blocks = 14, active = reduce ? blocks - 1 : Math.floor(((t * 0.8) % 1) * blocks), bw = (barW - 6) / blocks;
+      for (let i = 0; i <= active; i++) ctx.fillRect(barX + 3 + i * bw, barY + 3, bw - 2, barH - 6);
+
+      const pulse = reduce ? 0.6 : (Math.sin(t * 3.5) + 1) / 2;
+      const maxSpacing = 18, spacing = 3 + pulse * (maxSpacing - 3);
+      let size = 30;
+      ctx.font = '900 ' + size + 'px ' + font;
+      const plain = ctx.measureText(word).width + (word.length - 1) * maxSpacing;
+      if (plain > boxW - 36) { size = Math.max(14, Math.floor(size * (boxW - 36) / plain)); ctx.font = '900 ' + size + 'px ' + font; }
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const widths = []; let total = 0;
+      for (let i = 0; i < word.length; i++) { widths.push(ctx.measureText(word[i]).width); total += widths[i] + (i < word.length - 1 ? spacing : 0); }
+      const glitching = !reduce && Math.random() < GLITCH && Math.sin(t * 12) > 0.4;
+      if (glitching) { ctx.globalAlpha = 0.15; ctx.fillRect(bx, by + Math.random() * (boxH - 12), boxW, 12); ctx.globalAlpha = 1; }
+      let sx = bx + boxW / 2 - total / 2;
+      const ty = by + (boxH - 30) / 2 + 2;
+      ctx.globalAlpha = 0.4 + pulse * 0.6;
+      for (let i = 0; i < word.length; i++) {
+        let cx = sx + widths[i] / 2, cy = ty;
+        if (glitching && Math.random() > 0.5) { cx += (Math.random() - 0.5) * 7; cy += (Math.random() - 0.5) * 5; }
+        ctx.fillText(word[i], cx, cy);
+        if (!reduce && i === Math.floor((t * 6) % word.length)) ctx.fillRect(cx - widths[i] / 2, cy + size * 0.58, widths[i], 3);
+        sx += widths[i] + spacing;
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+    function frame(now) {
+      if (stopped) return;
+      time += (now - last) / 1000; last = now;
+      draw(time);
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    return {
+      stop(cb) {
+        container.classList.add('out');
+        setTimeout(() => { stopped = true; cancelAnimationFrame(raf); canvas.remove(); container.classList.remove('out'); if (cb) cb(); }, reduce ? 0 : 220);
+      }
+    };
+  }
+
+  /* ---------- ask for another gym / day ---------- */
+  fillGymSelect($('askGym'), true);
+  const askWhen = chips($('askWhen'), WHEN_OPTIONS, null);
+  const PART_LETTERS = ['m', 'a', 'e'];   // Morning / Afternoon / Evening, same order as WHEN_OPTIONS
+  /* Month calendar (same look as the booking pass on the invite pages).
+     Tap a day to pick it, tap it again to stay flexible. */
+  const cal = (function (box) {
+    const startOfDay = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+    const today = startOfDay(new Date());
+    const last = startOfDay(new Date()); last.setDate(last.getDate() + PITCH_DAYS_AHEAD);
+    let view = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selected = null, busy = new Set(), avail = {}, onPick = () => {};
+    const key = d => d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    const isoKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    function draw() {
+      box.innerHTML = '';
+      const head = document.createElement('div');
+      head.className = 'cal-head';
+      const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'cal-nav'; prev.textContent = '‹'; prev.setAttribute('aria-label', 'Previous month');
+      const next = document.createElement('button'); next.type = 'button'; next.className = 'cal-nav'; next.textContent = '›'; next.setAttribute('aria-label', 'Next month');
+      const title = document.createElement('b');
+      title.textContent = view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      prev.disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+      next.disabled = new Date(view.getFullYear(), view.getMonth() + 1, 1) > last;
+      prev.onclick = () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); };
+      next.onclick = () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); };
+      head.append(prev, title, next);
+
+      const grid = document.createElement('div');
+      grid.className = 'cal-grid';
+      ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].forEach(w => {
+        const c = document.createElement('div'); c.className = 'wd'; c.textContent = w; grid.appendChild(c);
+      });
+      const lead = (view.getDay() + 6) % 7;   // Monday first
+      for (let i = 0; i < lead; i++) grid.appendChild(document.createElement('div'));
+      const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+      for (let d = 1; d <= days; d++) {
+        const date = new Date(view.getFullYear(), view.getMonth(), d);
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cal-day';
+        b.textContent = d;
+        const fullyBusy = (avail[isoKey(date)] || '').length >= 3;   // my calendar says no all day
+        b.disabled = date < today || date > last || fullyBusy;
+        if (fullyBusy && !(date < today || date > last)) b.classList.add('full');
+        if (+date === +today) b.classList.add('today');
+        if (busy.has(key(date))) b.classList.add('has');
+        if (selected && +date === +selected) { b.classList.add('sel'); b.setAttribute('aria-pressed', 'true'); }
+        b.setAttribute('aria-label', date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+        b.onclick = () => { selected = selected && +selected === +date ? null : date; draw(); onPick(selected ? (avail[isoKey(selected)] || '') : ''); };
+        grid.appendChild(b);
+      }
+      const hint = document.createElement('p');
+      hint.className = 'cal-hint';
+      hint.textContent = TEXT.calHint;
+      box.append(head, grid, hint);
+    }
+    draw();
+    return {
+      value: () => selected,
+      mark: list => { busy = new Set(list.map(x => key(new Date(x.start)))); draw(); },
+      availability: map => { avail = map || {}; draw(); onPick(selected ? (avail[isoKey(selected)] || '') : ''); },
+      onPick: fn => { onPick = fn; }
+    };
+  })($('askCal'));
+
+  cal.onPick(busyLetters => askWhen.disable(PART_LETTERS.map((l, i) => busyLetters.includes(l) ? i : -1).filter(i => i >= 0)));
+  $('askName').value = me.name; $('askEmail').value = me.email;
+  $('askBtn').addEventListener('click', async () => {
+    const err = $('askErr'), gym = $('askGym').value, name = $('askName').value.trim(), email = $('askEmail').value.trim();
+    if (!gym) { err.textContent = 'Pick a gym first.'; return $('askGym').focus(); }
+    if (!name) { err.textContent = 'Add your first name.'; return $('askName').focus(); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'I need an email to answer you.'; return $('askEmail').focus(); }
+    err.textContent = '';
+    const btn = $('askBtn'); btn.disabled = true;
+    const minWait = new Promise(r => setTimeout(r, Ink.wait(btn)));
+    const dv = cal.value();
+    const dayLabel = dv ? dv.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+    const when = [dayLabel, (askWhen() || '').toLowerCase()].filter(Boolean).join(', ') || 'flexible';
+    const res = await post({ action: 'request', gym, when, note: $('askNote').value.trim(), name, email }).catch(() => null);
+    await minWait;
+    btn.disabled = false;
+    if (!res || !res.ok) { err.textContent = 'That didn\'t go through. Try again in a moment.'; return; }
+    me = { name, email }; store.set(NS + 'me', me);
+    const panel = btn.closest('.panel');
+    const done = document.createElement('p');
+    done.className = 'ok-note';
+    done.textContent = DEMO ? 'Demo mode: nothing was sent.' : TEXT.pitchSent;
+    panel.querySelector('.stack').replaceChildren(done);
+  });
+  Ink.attach($('askBtn'), 'drip');
+
+  // step 1 → 2: pick a gym, tap "Pick a day", the ticket loader runs while
+  // the free/busy check finishes (min ~1.2 s so it doesn't just flash)
+  $('askGym').addEventListener('change', () => { $('askGymErr').textContent = ''; });
+  $('askNext').addEventListener('click', () => {
+    if (!$('askGym').value) { $('askGymErr').textContent = 'Pick a gym first.'; return $('askGym').focus(); }
+    const btn = $('askNext'); btn.disabled = true;
+    setTimeout(() => {
+      $('askNextRow').hidden = true;
+      $('askLoading').hidden = false;
+      const ld = ticketLoader($('askLoading'), { word: 'CHALKING', label: 'Checking my calendar', height: 300 });   // ✏️ loader word
+      const started = Date.now();
+      (function wait() {
+        const ready = feedTried || Date.now() - started > 4000;   // give up waiting after 4 s
+        if (!ready || Date.now() - started < 1400) return setTimeout(wait, 100);
+        ld.stop(() => {
+          $('askLoading').hidden = true;
+          $('askMore').hidden = false;
+        });
+      })();
+    }, 120);
+  });
+
+  /* ---------- notify me ---------- */
+  $('notifyEmail').value = me.email;
+  $('notifyBtn').addEventListener('click', async () => {
+    const err = $('notifyErr'), email = $('notifyEmail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That email doesn\'t look right.'; return $('notifyEmail').focus(); }
+    err.textContent = '';
+    const btn = $('notifyBtn'); btn.disabled = true;
+    const minWait = new Promise(r => setTimeout(r, Ink.wait(btn)));
+    const res = await post({ action: 'subscribe', email, name: me.name }).catch(() => null);
+    await minWait;
+    btn.disabled = false;
+    if (!res || !res.ok) { err.textContent = 'That didn\'t go through. Try again in a moment.'; return; }
+    const done = document.createElement('p');
+    done.className = 'ok-note';
+    done.textContent = DEMO ? 'Demo mode: nothing was sent.' : (res.already ? TEXT.alreadyOn : TEXT.confirmMail);
+    btn.closest('.inline').replaceWith(done);
+  });
+  Ink.attach($('notifyBtn'), 'drip');
+
+  /* ---------- host switch (?admin=YOUR-KEY) ---------- */
+  if (ADMIN_KEY) {
+    document.querySelector('main.wrap').prepend($('host'));   // admin controls go first
+    $('host').classList.add('on');
+
+    // collapsible, remembered on this device
+    const setOpen = open => {
+      $('hostToggle').setAttribute('aria-expanded', String(open));
+      $('hostBody').hidden = !open;
+      store.set(NS + 'host-open', open);
+    };
+    setOpen(store.get(NS + 'host-open', true));
+    $('forgetAdmin').addEventListener('click', () => {
+      try { localStorage.removeItem(NS + 'admin'); } catch (e) {}
+      const u = new URL(location.href); u.searchParams.delete('admin'); u.searchParams.delete('view');
+      location.href = u.toString();
+    });
+    $('hostToggle').addEventListener('click', () => setOpen($('hostBody').hidden));
+    fillGymSelect($('hostGym'), false);
+
+    // how long: 1–5 h or "until…" (time picker); a planned session today overrides both
+    const hours = chips($('hostHours'),
+      CHECKIN_HOURS.map(h => ({ label: h + (h === 1 ? ' hour' : ' hours'), value: h })).concat([{ label: 'until…', value: 'until' }]), 2);
+    $('hostHours').addEventListener('click', () => {
+      $('hostUntil').hidden = hours() !== 'until';
+      if (hours() === 'until' && !$('hostUntil').value) {
+        const t = new Date(Date.now() + 3 * 3600000);
+        $('hostUntil').value = String(t.getHours()).padStart(2, '0') + ':' + String(Math.floor(t.getMinutes() / 15) * 15).padStart(2, '0');
+      }
+      useSession(false);
+    });
+    const effort = chips($('hostEffort'), EFFORT_OPTIONS, null);
+    // tap a selected effort chip again to clear it
+    $('hostEffort').addEventListener('click', e => {
+      const c = e.target.closest('.chip');
+      if (c && c.dataset.was === 'true') { c.setAttribute('aria-pressed', 'false'); c.dataset.was = ''; effortCleared = true; return; }
+      $('hostEffort').querySelectorAll('.chip').forEach(x => x.dataset.was = x.getAttribute('aria-pressed'));
+      effortCleared = false;
+    });
+    let effortCleared = false;
+    const effortValue = () => effortCleared ? '' : (effort() || '');
+
+    // "For this session": today's planned session that is running or starts within 4 h
+    let hostSession = null, sessionPicked = false;
+    function useSession(on) {
+      sessionPicked = on && !!hostSession;
+      $('hostSession').setAttribute('aria-pressed', String(sessionPicked));
+      $('hostGym').disabled = sessionPicked;
+      $('hostHours').style.opacity = sessionPicked ? 0.45 : 1;
+      if (sessionPicked) $('hostUntil').hidden = true;
+    }
+    $('hostSession').addEventListener('click', () => useSession(!sessionPicked));
+    window.__updateHostSession = list => {
+      const now = Date.now();
+      const s = (list || []).find(x => x.end > now && x.start - now < 4 * 3600000);
+      const changed = (s && s.id) !== (hostSession && hostSession.id);
+      hostSession = s || null;
+      $('hostSession').hidden = !hostSession;
+      if (!hostSession) { useSession(false); return; }
+      $('hostSession').innerHTML = '';
+      const b = document.createElement('b');
+      b.textContent = `For this session: ${s.label || 'planned session'}`;
+      const sp = document.createElement('span');
+      sp.textContent = `${fmtTime(s.start)}–${fmtTime(s.end)} at ${s.gym}. Live until it ends, even if you're early.`;
+      $('hostSession').append(b, sp);
+      $('hostSession').setAttribute('role', 'button');
+      $('hostSession').tabIndex = 0;
+      if (changed) useSession(true);   // preselect when a session shows up
+    };
+
+    const hostPost = async (data, okText) => {
+      const res = await post(Object.assign({ key: ADMIN_KEY }, data)).catch(() => null);
+      $('hostErr').textContent = !res ? 'No connection.' : res.ok ? okText : res.error === 'forbidden' ? 'Wrong admin key in the link.' : 'Didn\'t work, try again.';
+      if (res && res.ok) refresh();
+    };
+    $('hostIn').addEventListener('click', () => {
+      let gymName, location, until;
+      if (sessionPicked && hostSession) {
+        gymName = hostSession.gym; location = hostSession.location || hostSession.gym; until = hostSession.end;
+      } else {
+        const g = findGym($('hostGym').value) || { name: $('hostGym').value };
+        gymName = g.name; location = g.address ? g.name + ', ' + g.address : g.name;
+        if (hours() === 'until') {
+          const [h, m] = ($('hostUntil').value || '').split(':').map(Number);
+          const t = new Date(); t.setHours(h || 0, m || 0, 0, 0);
+          if (t.getTime() <= Date.now()) t.setDate(t.getDate() + 1);    // e.g. "until 01:00" = after midnight
+          until = t.getTime();
+        } else {
+          until = Date.now() + (Number(hours()) || 2) * 3600000;
+        }
+      }
+      if (until - Date.now() > 8 * 3600000) { $('hostErr').textContent = 'Max 8 hours. Even your skin needs a break.'; return; }
+      hostPost({ action: 'checkin', gym: gymName, location, until, effort: effortValue() },
+               `You're live until ${fmtTime(until)}.`);
+    });
+    $('hostOut').addEventListener('click', () => hostPost({ action: 'checkout' }, 'Banner is off.'));
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ADMIN DASHBOARD — ?admin=YOUR-KEY&view=dashboard
+     Data comes from Code.gs only when the key is right (emails inside).
+     ═══════════════════════════════════════════════════════════════ */
+  const DASH = ADMIN_KEY && params.get('view') === 'dashboard';
+  const urlWith = view => { const u = new URL(location.href); u.searchParams.delete('admin'); if (view) u.searchParams.set('view', view); else u.searchParams.delete('view'); return u.toString(); };
+  if (ADMIN_KEY) {
+    $('dashLink').href = urlWith('dashboard');
+    $('dashBack').href = urlWith(null);
+  }
+
+  const fmtDate = t => new Date(t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const fmtStamp = t => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  async function copy(text, btn) {
+    try { await navigator.clipboard.writeText(text); } catch (e) {
+      const t = el('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+    }
+    const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = old; }, 1400);
+  }
+
+  function demoDashboard() {
+    const f = demoFeed(), d = n => Date.now() - n * 86400000;
+    f.sessions[0].people = [
+      { name: 'Tom', email: 'tom@example.com', status: 'going', at: d(3) },
+      { name: 'Lisa', email: 'lisa@example.com', status: 'going', at: d(2) },
+      { name: 'Jan', email: 'jan@example.com', status: 'going', at: d(1) },
+      { name: 'Ben', email: 'ben@example.com', status: 'left', at: d(4) }];
+    f.sessions[1].people = [
+      { name: 'Mo', email: 'mo@example.com', status: 'going', at: d(1) },
+      { name: 'Sara', email: 'sara@example.com', status: 'going', at: d(0) }];
+    f.sessions[2].people = [];
+    return Object.assign(f, { ok: true,
+      requests: [
+        { at: d(0), name: 'Lena', email: 'lena@example.com', gym: 'Prisma', when: 'Thu 15 Oct, evening', note: 'Bringing a friend who has never bouldered' },
+        { at: d(5), name: 'Chris', email: 'chris@example.com', gym: 'Boulderplanet', when: 'flexible', note: '' }],
+      subscribers: [
+        { email: 'anna@example.com', name: 'Anna', status: 'active', at: d(2) },
+        { email: 'kai@example.com', name: '', status: 'pending', at: d(1) },
+        { email: 'old@example.com', name: '', status: 'unsubscribed', at: d(20) },
+        { email: 'jo@example.com', name: 'Jo', status: 'active', at: d(9) }],
+      visits: (() => {
+        const at = (days, h, m) => { const x = new Date(); x.setDate(x.getDate() - days); x.setHours(h, m, 0, 0); return +x; };
+        return [
+          { gym: 'Superblock', type: 'spontaneous', checkIn: at(0, 18, 42), plannedUntil: at(0, 21, 0), checkOut: null, minutes: null, closedBy: '' },
+          { gym: 'Superblock', type: 'planned', checkIn: at(2, 18, 55), plannedUntil: at(2, 21, 0), checkOut: at(2, 21, 15), minutes: 140, closedBy: 'manual', effort: 'project mode' },
+          { gym: 'Einstein Düsseldorf', type: 'spontaneous', checkIn: at(5, 11, 10), plannedUntil: at(5, 13, 10), checkOut: at(5, 13, 10), minutes: 120, closedBy: 'auto' },
+          { gym: 'Superblock', type: 'planned', checkIn: at(9, 19, 2), plannedUntil: at(9, 21, 0), checkOut: at(9, 21, 40), minutes: 158, closedBy: 'manual' },
+          { gym: 'Superblock', type: 'planned', checkIn: at(16, 19, 0), plannedUntil: at(16, 21, 0), checkOut: at(16, 20, 50), minutes: 110, closedBy: 'manual' }
+        ];
+      })() });
+  }
+
+  let subView = 'active', dashData = null;
+  async function loadDashboard() {
+    $('dashSub').textContent = 'Loading…';
+    let data;
+    try { data = DEMO ? demoDashboard() : await (await fetch(ENDPOINT, { method: 'POST', body: JSON.stringify({ action: 'dashboard', key: ADMIN_KEY }) })).json(); }
+    catch (e) { data = null; }
+    if (!data || !data.ok) {
+      $('dashSub').textContent = data && data.error === 'forbidden' ? 'Wrong admin key in the link.' : 'Couldn\'t load. Try Refresh.';
+      return;
+    }
+    dashData = data;
+    renderDash();
+    if ((data.v || 0) < LATEST_BACKEND && !$('updNote')) {
+      const n = el('div', 'empty-state', 'There\'s a newer version of the Google script for your page. Ask whoever sent you the template for the update, the steps take two minutes.');
+      n.id = 'updNote'; n.style.marginBottom = '16px';
+      $('dashStats').before(n);
+    }
+  }
+
+  // draws everything from dashData (also after a delete, without reloading)
+  const DASH_PER_PAGE = 3;   // ✏️ sessions per page on the dashboard
+  let dashPage = 0;
+  function renderDash() {
+    const data = dashData;
+    const going = data.sessions.reduce((n, s) => n + s.people.filter(p => p.status === 'going').length, 0);
+    const active = data.subscribers.filter(x => x.status === 'active').length;
+    const recent = data.requests.filter(r => Date.now() - new Date(r.at) < 30 * 86400000).length;
+    $('dashSub').textContent = (data.now ? `You're live at ${data.now.gym} until ${fmtTime(data.now.until)}. ` : 'You\'re off the wall right now. ') +
+      `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}${DEMO ? ' (demo data)' : ''}.`;
+
+    const stats = $('dashStats'); stats.innerHTML = '';
+    [[data.sessions.length, 'upcoming sessions'], [going, 'sign-ups'], [recent, 'pitches, last 30 days'], [active, 'on the ping list']]
+      .forEach(([n, label]) => { const t = el('div', 'stat'); t.append(el('b', '', n), el('span', '', label)); stats.appendChild(t); });
+
+    renderVisits();
+
+    // who's in — paged, 3 at a time
+    const box = $('dashSessions'); box.innerHTML = '';
+    if (!data.sessions.length) box.appendChild(el('p', 'muted-line', 'No sessions in the calendar for the next weeks.'));
+    const dPages = Math.max(1, Math.ceil(data.sessions.length / DASH_PER_PAGE));
+    dashPage = Math.min(dashPage, dPages - 1);
+    $('dashPager').classList.toggle('on', dPages > 1);
+    $('dCount').textContent = `${dashPage + 1} / ${dPages}`;
+    $('dPrev').disabled = dashPage === 0;
+    $('dNext').disabled = dashPage >= dPages - 1;
+    data.sessions.slice(dashPage * DASH_PER_PAGE, (dashPage + 1) * DASH_PER_PAGE).forEach(s => {
+      const c = el('div', 'dcard'), head = el('div', 'dcard-head');
+      const goingP = s.people.filter(p => p.status === 'going'), leftP = s.people.filter(p => p.status !== 'going');
+      head.append(el('b', '', `${fmtDate(s.start)}, ${fmtTime(s.start)} at ${s.gym}`), el('span', '', `${goingP.length} going`));
+      c.appendChild(head);
+      if (s.label) c.appendChild(el('p', 'muted-line', s.label));
+      if (!s.people.length) c.appendChild(el('p', 'muted-line', 'Nobody yet.'));
+      const ul = el('ul', 'people');
+      goingP.concat(leftP).forEach(p => {
+        const li = el('li', p.status === 'going' ? '' : 'left');
+        const a = el('a', '', p.email); a.href = 'mailto:' + p.email;
+        li.append(el('span', '', p.name + (p.status === 'going' ? '' : ' (cancelled)')), a);
+        ul.appendChild(li);
+      });
+      if (s.people.length) c.appendChild(ul);
+      if (goingP.length) {
+        const act = el('div', 'row-actions');
+        const b = el('button', 'pg-btn', 'Copy emails'); b.type = 'button';
+        b.onclick = () => copy(goingP.map(p => p.email).join(', '), b);
+        const m = el('a', 'pg-btn', 'Email all');
+        m.href = `mailto:?bcc=${encodeURIComponent(goingP.map(p => p.email).join(','))}&subject=${encodeURIComponent(`Bouldering ${fmtDate(s.start)} at ${s.gym}`)}`;
+        m.style.textDecoration = 'none';
+        act.append(b, m); c.appendChild(act);
+      }
+      box.appendChild(c);
+    });
+
+    // pitches
+    const pb = $('dashPitches'); pb.innerHTML = '';
+    if (!data.requests.length) pb.appendChild(el('p', 'muted-line', 'No pitches yet.'));
+    data.requests.forEach(r => {
+      const c = el('div', 'dcard'), head = el('div', 'dcard-head');
+      head.append(el('b', '', `${r.name}: ${r.gym}`), el('span', '', fmtStamp(r.at)));
+      c.append(head, el('p', 'muted-line', r.when || 'flexible'));
+      if (r.note) c.appendChild(el('p', 'pitch-note', r.note));
+      const act = el('div', 'row-actions');
+      const reply = el('a', 'pg-btn', 'Reply'); reply.style.textDecoration = 'none';
+      reply.href = `mailto:${r.email}?subject=${encodeURIComponent(`Re: bouldering at ${r.gym}`)}`;
+      act.append(reply, el('span', 'muted-line', r.email));
+      c.appendChild(act);
+      pb.appendChild(c);
+    });
+
+    renderSubs();
+  }
+
+  function renderSubs() {
+    const subs = dashData.subscribers, f = $('subFilter'); f.innerHTML = '';
+    ['active', 'pending', 'unsubscribed', 'all'].forEach(k => {
+      const n = k === 'all' ? subs.length : subs.filter(x => x.status === k).length;
+      const c = el('button', 'chip', `${k} ${n}`); c.type = 'button';
+      c.setAttribute('aria-pressed', String(subView === k));
+      c.onclick = () => { subView = k; renderSubs(); };
+      f.appendChild(c);
+    });
+    const box = $('dashSubs'); box.innerHTML = '';
+    const list = subs.filter(x => subView === 'all' || x.status === subView);
+    if (!list.length) box.appendChild(el('p', 'muted-line', 'Nobody here.'));
+    list.forEach(x => {
+      const row = el('div', 'sub-row'), left = el('div');
+      const a = el('a', '', x.email); a.href = 'mailto:' + x.email;
+      left.appendChild(a);
+      const right = el('div'); right.style.display = 'flex'; right.style.gap = '8px'; right.style.alignItems = 'center';
+      const del = el('button', 'del-btn', 'Delete'); del.type = 'button';
+      del.setAttribute('aria-label', 'Delete ' + x.email);
+      del.onclick = () => deleteSub(x.email, del);
+      right.append(el('span', 'badge ' + x.status, x.status), el('small', '', fmtStamp(x.at)), del);
+      row.append(left, right);
+      box.appendChild(row);
+    });
+  }
+
+  // ── your visits: stats + list ──
+  let visitsShown = 6;
+  const dur = m => m == null ? '' : (m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}` : `${m} min`);
+  function weekStart(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return +d; }
+  function renderVisits() {
+    const v = (dashData.visits || []).filter(x => x.checkIn);
+    const now = new Date(), monthStart = +new Date(now.getFullYear(), now.getMonth(), 1);
+    const thisMonth = v.filter(x => +new Date(x.checkIn) >= monthStart);
+    const minutes = thisMonth.reduce((n, x) => n + (Number(x.minutes) || 0), 0);
+    const gyms = {}; v.forEach(x => { gyms[x.gym] = (gyms[x.gym] || 0) + 1; });
+    const fav = Object.keys(gyms).sort((a, b) => gyms[b] - gyms[a])[0];
+    // streak: consecutive weeks (back from this or last week) with at least one visit
+    const weeks = new Set(v.map(x => weekStart(x.checkIn)));
+    let streak = 0, w = weekStart(Date.now());
+    if (!weeks.has(w)) w -= 7 * 86400000;
+    while (weeks.has(w)) { streak++; w -= 7 * 86400000; }
+
+    const st = $('visitStats'); st.innerHTML = '';
+    [[`${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}`, 'on the wall this month'],
+     [thisMonth.length, 'visits this month'],
+     [fav || '–', 'favourite gym'],
+     [streak ? `${streak} wk` : '0', 'weeks in a row']]
+      .forEach(([n, label]) => { const t = el('div', 'stat'); t.append(el('b', '', n), el('span', '', label)); st.appendChild(t); });
+    st.lastChild && (st.children[2].querySelector('b').style.fontSize = '18px');
+
+    const list = $('visitList'); list.innerHTML = '';
+    if (!v.length) list.appendChild(el('p', 'muted-line', 'No visits logged yet. They show up here after "I\'m here".'));
+    v.slice(0, visitsShown).forEach(x => {
+      const open = !x.checkOut;
+      const row = el('div', 'visit-row' + (open ? ' open' : ''));
+      row.appendChild(el('b', '', `${fmtDate(x.checkIn)} at ${x.gym}`));
+      const d = el('div', 'vd', open ? 'live' : dur(Number(x.minutes)));
+      const tag = el('small', '', (x.type === 'spontaneous' ? 'spontaneous' : 'planned') + (x.effort ? ', ' + x.effort : ''));
+      d.appendChild(tag);
+      row.appendChild(d);
+      const times = open ? `since ${fmtTime(x.checkIn)}, planned till ${fmtTime(x.plannedUntil)}`
+                         : `${fmtTime(x.checkIn)}–${fmtTime(x.checkOut)}${x.closedBy === 'auto' ? ' (auto-closed)' : ''}`;
+      row.appendChild(el('span', 'vt', times));
+      list.appendChild(row);
+    });
+    $('visitMore').hidden = v.length <= visitsShown;
+  }
+
+  // first tap: "Sure?" (3 s window), second tap: delete from the sheet
+  async function deleteSub(email, btn) {
+    if (!btn.classList.contains('armed')) {
+      btn.classList.add('armed'); btn.textContent = 'Sure?';
+      clearTimeout(btn._t);
+      btn._t = setTimeout(() => { btn.classList.remove('armed'); btn.textContent = 'Delete'; }, 3000);
+      return;
+    }
+    clearTimeout(btn._t);
+    btn.disabled = true; btn.textContent = '…';
+    let res;
+    try { res = DEMO ? { ok: true } : await (await fetch(ENDPOINT, { method: 'POST', body: JSON.stringify({ action: 'deleteSubscriber', key: ADMIN_KEY, email }) })).json(); }
+    catch (e) { res = null; }
+    if (!res || !res.ok) {
+      btn.disabled = false; btn.classList.remove('armed');
+      btn.textContent = res && res.error === 'not_found' ? 'Gone already' : 'Failed';
+      if (res && res.error === 'not_found') dashData.subscribers = dashData.subscribers.filter(x => x.email !== email);
+      setTimeout(renderDash, 1200);
+      return;
+    }
+    dashData.subscribers = dashData.subscribers.filter(x => x.email !== email);
+    renderDash();
+  }
+
+  if (DASH) {
+    $('visitMore').onclick = () => { visitsShown += 10; renderVisits(); };
+    $('dPrev').onclick = () => { dashPage--; renderDash(); };
+    $('dNext').onclick = () => { dashPage++; renderDash(); };
+    document.querySelector('main.wrap:not(.dash)').hidden = true;
+    $('dash').hidden = false;
+    document.title = 'Dashboard';
+    $('dashRefresh').onclick = loadDashboard;
+    $('copySubs').onclick = () => copy(dashData ? dashData.subscribers.filter(x => x.status === 'active').map(x => x.email).join(', ') : '', $('copySubs'));
+    loadDashboard();
+  }
+
+  /* ---------- load + keep fresh ---------- */
+  // loading animation until the first data arrives, then reveal everything at once
+  let loadTick = 0;
+  const loadTimer = setInterval(() => {
+    const t = $('loaderText');
+    t.style.opacity = 0;
+    setTimeout(() => { loadTick++; t.textContent = TEXT.loading[loadTick % TEXT.loading.length]; t.style.opacity = 1; }, 250);
+  }, 1300);
+  function reveal() {
+    if (!$('content').classList.contains('pending')) return;
+    clearInterval(loadTimer);
+    $('loader').hidden = true;
+    $('content').classList.remove('pending');
+    $('content').classList.add('revealed');
+    document.documentElement.classList.remove('awaiting');
+  }
+  setTimeout(reveal, 15000);   // never keep people waiting forever
+
+  // the link works, but its owner hasn't finished the setup in their sheet
+  function notReady() {
+    $('title').textContent = 'Almost there';
+    $('intro').hidden = false;
+    $('intro').textContent = 'This page is still being set up. Check back soon.';
+    ['pitch', 'ping'].forEach(id => { $(id).hidden = true; });
+    $('sessions').innerHTML = '<div class="empty-state">Nothing to see yet. If this is your page: open your Google Sheet → menu \u201c🧗 A Place About Falling\u201d → \u201cEinrichten / Set up\u201d.</div>';
+  }
+
+  async function refresh() {
+    try {
+      const data = await getFeed();
+      if (data.error === 'not_set_up') { notReady(); feedTried = true; reveal(); return; }
+      if (data.error) throw new Error(data.error);
+      feedData = data;
+      applyProfile(feedData.profile);
+      window.APAF_BACKEND_V = feedData.v || 0;
+      renderLive(feedData.now, feedData.sessions);
+      if (ADMIN_KEY && window.__updateHostSession) window.__updateHostSession(feedData.sessions);
+      if (ADMIN_KEY) {
+        const st = $('hostStatus');
+        st.textContent = feedData.now ? `live until ${fmtTime(feedData.now.until)}` : 'off';
+        st.classList.toggle('is-live', !!feedData.now);
+      }
+      cal.mark(feedData.sessions || []);
+      cal.availability(feedData.availability);
+      // don't wipe a half-filled join form on the background refresh
+      if (!document.querySelector('.join-form.open')) renderSessions(feedData.sessions || []);
+    } catch (e) {
+      $('sessions').innerHTML = '<div class="empty-state">The sessions couldn\'t load right now. Pull to refresh, or try again in a minute.</div>';
+      if (!feedData) {                         // never loaded: don't show someone else's default texts
+        $('title').textContent = 'No wall here (yet)';
+        $('intro').hidden = false;
+        $('intro').textContent = 'This link doesn\'t answer right now. Maybe a typo in the link, or the page is still being set up.';
+        $('helloLine').textContent = 'Oi! ☀️';
+        ['pitch', 'ping'].forEach(id => { $(id).hidden = true; });
+      }
+    }
+    feedTried = true;
+    reveal();
+  }
+  if (!DASH) {
+    refresh();
+    setInterval(refresh, 60000);
+  }
+  if (DEMO) $('privacy').textContent += ' (Demo mode: the sessions shown are examples.)';
+
+  // (no service worker here: one shared page serves many people)
+})();
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   QR — tiny QR code maker (byte mode, error correction "M"), no
+   outside library, nothing loaded from anywhere. Structure follows
+   Project Nayuki's QR Code generator (MIT).
+   QR.svg(text, { dark, light, quiet }) → '<svg …>' string
+   ═══════════════════════════════════════════════════════════════ */
+const QR = (() => {
+  // level M: ECC codewords per block and number of blocks, by version 1–40
+  const ECC = [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28];
+  const BLOCKS = [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49];
+  const FORMAT_M = 0;
+
+  const rawModules = v => {
+    let r = (16 * v + 128) * v + 64;
+    if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; }
+    return r;
+  };
+  const dataCodewords = v => Math.floor(rawModules(v) / 8) - ECC[v] * BLOCKS[v];
+
+  const gfMul = (x, y) => {
+    let z = 0;
+    for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11d); z ^= ((y >>> i) & 1) * x; }
+    return z;
+  };
+  function rsDivisor(degree) {
+    const r = new Array(degree).fill(0); r[degree - 1] = 1;
+    let root = 1;
+    for (let i = 0; i < degree; i++) {
+      for (let j = 0; j < r.length; j++) { r[j] = gfMul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; }
+      root = gfMul(root, 0x02);
+    }
+    return r;
+  }
+  function rsRemainder(data, div) {
+    const r = div.map(() => 0);
+    for (const b of data) {
+      const f = b ^ r.shift(); r.push(0);
+      div.forEach((c, i) => { r[i] ^= gfMul(c, f); });
+    }
+    return r;
+  }
+
+  function encode(text) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let ver = 1;
+    for (; ver <= 40; ver++) {
+      const cc = ver <= 9 ? 8 : 16;
+      if (4 + cc + bytes.length * 8 <= dataCodewords(ver) * 8) break;
+    }
+    if (ver > 40) throw new Error('QR: text too long');
+    const bits = [];
+    const put = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+    put(0b0100, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    const cap = dataCodewords(ver) * 8;
+    put(0, Math.min(4, cap - bits.length));
+    put(0, (8 - bits.length % 8) % 8);
+    for (let pad = 0xec; bits.length < cap; pad ^= 0xec ^ 0x11) put(pad, 8);
+    const data = [];
+    for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+
+    // split into blocks, add error correction, interleave
+    const nb = BLOCKS[ver], ecl = ECC[ver], raw = Math.floor(rawModules(ver) / 8);
+    const nShort = nb - raw % nb, shortLen = Math.floor(raw / nb), div = rsDivisor(ecl), blocks = [];
+    for (let i = 0, k = 0; i < nb; i++) {
+      const dat = data.slice(k, k + shortLen - ecl + (i < nShort ? 0 : 1)); k += dat.length;
+      const ecc = rsRemainder(dat, div);
+      if (i < nShort) dat.push(0);
+      blocks.push(dat.concat(ecc));
+    }
+    const all = [];
+    for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== shortLen - ecl || j >= nShort) all.push(b[i]); });
+    return { ver, codewords: all };
+  }
+
+  function matrix(text) {
+    const { ver, codewords } = encode(text);
+    const size = ver * 4 + 17;
+    const mod = Array.from({ length: size }, () => new Array(size).fill(false));
+    const fn = Array.from({ length: size }, () => new Array(size).fill(false));
+    const set = (x, y, dark) => { mod[y][x] = dark; fn[y][x] = true; };
+
+    for (let i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    const finder = (cx, cy) => {
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy));
+        if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4);
+      }
+    };
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    if (ver > 1) {
+      const n = Math.floor(ver / 7) + 2;
+      const step = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2;
+      const pos = [6];
+      for (let p = size - 7; pos.length < n; p -= step) pos.splice(1, 0, p);
+      pos.forEach((a, i) => pos.forEach((b, j) => {
+        if ((i === 0 && j === 0) || (i === 0 && j === n - 1) || (i === n - 1 && j === 0)) return;
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(a + dx, b + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }));
+    }
+    const format = mask => {
+      const d = FORMAT_M << 3 | mask;
+      let r = d;
+      for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+      const b = (d << 10 | r) ^ 0x5412, bit = i => ((b >>> i) & 1) === 1;
+      for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+      set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+      for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+      for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+      for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+      set(8, size - 8, true);
+    };
+    format(0);   // reserve the format areas before placing data
+    if (ver >= 7) {
+      let r = ver;
+      for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1f25);
+      const b = ver << 12 | r;
+      for (let i = 0; i < 18; i++) {
+        const dark = ((b >>> i) & 1) === 1, a = size - 11 + i % 3, c = Math.floor(i / 3);
+        set(a, c, dark); set(c, a, dark);
+      }
+    }
+
+    // data, zigzag from the bottom right
+    let i = 0;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let v = 0; v < size; v++) for (let j = 0; j < 2; j++) {
+        const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - v : v;
+        if (!fn[y][x] && i < codewords.length * 8) { mod[y][x] = ((codewords[i >>> 3] >>> (7 - (i & 7))) & 1) === 1; i++; }
+      }
+    }
+
+    const MASKS = [
+      (x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, (x, y) => x % 3 === 0, (x, y) => (x + y) % 3 === 0,
+      (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => x * y % 2 + x * y % 3 === 0,
+      (x, y) => (x * y % 2 + x * y % 3) % 2 === 0, (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0
+    ];
+    const applyMask = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!fn[y][x] && MASKS[m](x, y)) mod[y][x] = !mod[y][x]; };
+
+    // pick the mask with the lowest penalty (makes it easier to scan)
+    const penalty = () => {
+      let p = 0, dark = 0;
+      const line = get => {
+        let run = 1;
+        for (let k = 1; k <= size; k++) {
+          if (k < size && get(k) === get(k - 1)) run++;
+          else { if (run >= 5) p += run - 2; run = 1; }
+        }
+        for (let k = 0; k + 6 < size; k++) {
+          if (get(k) && !get(k + 1) && get(k + 2) && get(k + 3) && get(k + 4) && !get(k + 5) && get(k + 6)) {
+            const light = (a, b) => { for (let q = a; q < b; q++) if (q >= 0 && q < size && get(q)) return false; return true; };
+            if (light(k - 4, k) || light(k + 7, k + 11)) p += 40;
+          }
+        }
+      };
+      for (let y = 0; y < size; y++) line(x => mod[y][x]);
+      for (let x = 0; x < size; x++) line(y => mod[y][x]);
+      for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) {
+        const c = mod[y][x];
+        if (c === mod[y][x + 1] && c === mod[y + 1][x] && c === mod[y + 1][x + 1]) p += 3;
+      }
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (mod[y][x]) dark++;
+      return p + Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10;
+    };
+    let best = 0, bestP = Infinity;
+    for (let m = 0; m < 8; m++) {
+      applyMask(m); format(m);
+      const p = penalty();
+      if (p < bestP) { bestP = p; best = m; }
+      applyMask(m);
+    }
+    applyMask(best); format(best);
+    return mod;
+  }
+
+  function svg(text, o = {}) {
+    const m = matrix(text), q = o.quiet ?? 4, n = m.length + q * 2;
+    let d = '';
+    m.forEach((row, y) => row.forEach((on, x) => { if (on) d += `M${x + q} ${y + q}h1v1h-1z`; }));
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" role="img" aria-label="QR code">` +
+      `<rect width="${n}" height="${n}" fill="${o.light || '#fff'}"/><path d="${d}" fill="${o.dark || '#000'}"/></svg>`;
+  }
+  return { svg, matrix };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL — top bar, menu, QR sheet, admin sheet, dashboard
+   tabs. Runs after the main script and only rearranges / adds things.
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  function wireLandingShell() {
+    $('tbQr').remove(); $('tbMenu').remove();
+  }
+  if (document.documentElement.classList.contains('is-landing')) { $('topbar').classList.add('always'); $('tbLive').remove(); return wireLandingShell(); }
+  const isAdmin = $('host').classList.contains('on');           // the main script decided that
+  const isDash = !$('dash').hidden;
+  // ✏️ the two pages the QR sheet can show (public links, never with ?admin)
+  const CODE = new URLSearchParams(location.search).get('c') || '';
+  const PAGE_URL = location.origin + location.pathname.replace(/[^/]*$/, '') + '?c=' + encodeURIComponent(CODE);
+  const profile = () => window.APAF_PROFILE || {};
+  const HANGOUT_URL = () => /^https:\/\//.test(profile().hangoutUrl || '') ? profile().hangoutUrl : '';
+
+  /* ---------- top bar: border + name appear once you scroll ---------- */
+  const bar = $('topbar');
+  const onScroll = () => bar.classList.toggle('scrolled', window.scrollY > 40);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  $('tbBrand').addEventListener('click', e => { e.preventDefault(); closeAll(); scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  /* ---------- overlays: one at a time, shared scrim ---------- */
+  let open = null, lastFocus = null;
+  function show(el, trigger) {
+    if (open === el) return closeAll();
+    closeAll(true);
+    open = el; lastFocus = trigger || document.activeElement;
+    el.classList.add('on'); $('scrim').classList.add('on');
+    if (el.id === 'menu') $('tbMenu').setAttribute('aria-expanded', 'true');
+    else document.body.classList.add('locked');
+    const f = el.querySelector('a, button'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 50);
+  }
+  function closeAll(silent) {
+    if (!open) return;
+    open.classList.remove('on'); $('scrim').classList.remove('on');
+    $('tbMenu').setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('locked');
+    if (!silent && lastFocus) lastFocus.focus({ preventScroll: true });
+    open = null;
+  }
+  $('scrim').addEventListener('click', () => closeAll());
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeAll()));
+  // swipe a sheet down to close it
+  document.querySelectorAll('.sheet').forEach(s => {
+    let y0 = null;
+    s.addEventListener('touchstart', e => { y0 = s.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+    s.addEventListener('touchmove', e => {
+      if (y0 === null) return;
+      const dy = e.touches[0].clientY - y0;
+      if (dy > 0) { s.style.transition = 'none'; s.style.transform = `translateY(${dy}px)`; }
+    }, { passive: true });
+    s.addEventListener('touchend', e => {
+      if (y0 === null) return;
+      const dy = e.changedTouches[0].clientY - y0; y0 = null;
+      s.style.transition = ''; s.style.transform = '';
+      if (dy > 90) closeAll();
+    });
+  });
+
+  /* ---------- menu ---------- */
+  $('tbMenu').addEventListener('click', e => show($('menu'), e.currentTarget));
+  const syncProfile = () => {
+    $('menuHangout').hidden = !HANGOUT_URL();
+    $('menuHangout').href = HANGOUT_URL() || '#';
+    $('qrSwitch').hidden = !HANGOUT_URL();
+    if (!isDash) $('tbName').textContent = profile().name ? profile().name + '\u2019s wall' : 'A Place About Falling';
+  };
+  document.addEventListener('apaf:profile', syncProfile);
+  syncProfile();
+  document.querySelectorAll('#menu a[data-page]').forEach(a => a.addEventListener('click', e => {
+    let id = a.getAttribute('href').slice(1);
+    if (isDash) return;                                   // dashboard: links go to the page (href set below)
+    e.preventDefault(); closeAll(true);
+    if (id === 'rightNow') id = $('live').classList.contains('on') ? 'live' : 'rest';
+    const t = $(id); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+  $('menuQr').addEventListener('click', () => show($('qrSheet'), $('tbQr')));
+
+  /* ---------- QR sheet ---------- */
+  const QR_PAGES = {
+    climb:   () => ({ url: PAGE_URL, kicker: 'point your camera here', title: profile().name ? 'Climb with ' + profile().name : 'A Place About Falling' }),
+    hangout: () => ({ url: HANGOUT_URL(), kicker: 'not into falling?', title: 'Hangout invite' })
+  };
+  let qrWhich = 'climb';
+  function drawQr() {
+    if (!HANGOUT_URL()) qrWhich = 'climb';
+    const p = QR_PAGES[qrWhich]();
+    $('qrCode').innerHTML = QR.svg(p.url, { dark: '#1c1b19', light: '#fcba01', quiet: 2 });
+    $('qrKicker').textContent = p.kicker;
+    $('qrTitle').textContent = p.title;
+    $('qrUrl').textContent = p.url.replace(/^https?:\/\//, '');
+    document.querySelectorAll('[data-qr]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.qr === qrWhich)));
+  }
+  document.querySelectorAll('[data-qr]').forEach(b => b.addEventListener('click', () => { qrWhich = b.dataset.qr; drawQr(); }));
+  $('tbQr').addEventListener('click', e => { drawQr(); show($('qrSheet'), e.currentTarget); });
+  $('menuQr').addEventListener('click', drawQr);
+  if (!navigator.share) $('qrShare').hidden = true, $('qrCopy').classList.remove('ghost'), $('qrCopy').style.gridColumn = '1 / -1';
+  $('qrShare').addEventListener('click', () => {
+    const p = QR_PAGES[qrWhich]();
+    navigator.share({ title: p.title, url: p.url }).catch(() => {});
+  });
+  $('qrCopy').addEventListener('click', async () => {
+    const b = $('qrCopy');
+    try { await navigator.clipboard.writeText(QR_PAGES[qrWhich]().url); b.textContent = 'Copied ✓'; }
+    catch (e) { b.textContent = 'Copy failed'; }
+    setTimeout(() => { b.textContent = 'Copy link'; }, 1600);
+  });
+
+  /* ---------- live pill in the bar (mirrors the page's own live state) ---------- */
+  function syncLive() {
+    const st = $('hostStatus'), liveCard = $('live');
+    const live = isAdmin ? st.classList.contains('is-live') : liveCard.classList.contains('on');
+    $('tbLive').classList.toggle('on', live);
+    $('tbLiveText').textContent = isAdmin && live ? st.textContent.replace('live ', '') : 'live';
+    $('fab').classList.toggle('live', live);
+    $('fabText').textContent = live ? 'Live · check out' : "I'm at the gym";
+    $('menuHostSub').textContent = live ? 'You\'re ' + st.textContent : 'Check in or out';
+  }
+  new MutationObserver(syncLive).observe($('live'), { attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(syncLive).observe($('hostStatus'), { attributes: true, childList: true, characterData: true, subtree: true });
+  syncLive();
+
+  /* ---------- admin: panel moves into a sheet, opened by the floating button ---------- */
+  if (isAdmin) {
+    $('menuAdmin').hidden = false;
+    $('hostSlot').appendChild($('host'));
+    const openHost = () => show($('hostSheet'), $('fab'));
+    $('fab').hidden = isDash;
+    document.body.classList.toggle('has-fab', !isDash);
+    $('fab').addEventListener('click', openHost);
+    $('menuHost').addEventListener('click', () => {
+      if (isDash) { location.href = $('dashBack').href + '#host'; return; }
+      openHost();
+    });
+    $('menuDash').href = $('dashLink').href;
+    // close the sheet a moment after checking in / out, so you see it worked
+    ['hostIn', 'hostOut'].forEach(id => $(id).addEventListener('click', () => setTimeout(() => {
+      if (!$('hostErr').textContent && open === $('hostSheet')) closeAll();
+    }, 1400)));
+    if (location.hash === '#host' && !isDash) setTimeout(openHost, 600);
+  }
+
+  /* ---------- dashboard: bar shows refresh, sections become tabs ---------- */
+  if (isDash) {
+    bar.classList.add('always');
+    $('tbName').textContent = 'Dashboard';
+    $('tbRefresh').hidden = false;
+    $('tbRefresh').addEventListener('click', () => $('dashRefresh').click());
+    $('menuDash').hidden = true; $('menuPage').hidden = false; $('menuPage').href = $('dashBack').href;
+    document.querySelectorAll('#menu a[data-page]').forEach(a => { a.href = $('dashBack').href + a.getAttribute('href').replace('rightNow', 'live'); });
+    $('menuQr').hidden = false;
+
+    const dash = $('dash');
+    dash.classList.add('tabbed');
+    const tabs = [
+      { id: 'overview', icon: '📊', label: 'Overview' },
+      { id: 'whosin',   icon: '🧗', label: "Who's in" },
+      { id: 'pitches',  icon: '✋', label: 'Pitches' },
+      { id: 'pings',    icon: '🔔', label: 'Ping list' }
+    ];
+    const nav = document.createElement('nav');
+    nav.className = 'dash-tabs'; nav.setAttribute('role', 'tablist'); nav.setAttribute('aria-label', 'Dashboard sections');
+    tabs.forEach(t => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.go = t.id;
+      b.innerHTML = `<span class="ti" aria-hidden="true">${t.icon}</span>${t.label}<span class="badge" id="badge-${t.id}"></span>`;
+      b.addEventListener('click', () => select(t.id, true));
+      nav.appendChild(b);
+    });
+    document.body.appendChild(nav);
+    function select(id, user) {
+      dash.querySelectorAll('[data-tab]').forEach(s => s.classList.toggle('on', s.dataset.tab === id));
+      nav.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.go === id)));
+      try { sessionStorage.setItem('cwm-dash-tab', id); } catch (e) {}
+      if (user) scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    let start = 'overview';
+    try { start = sessionStorage.getItem('cwm-dash-tab') || start; } catch (e) {}
+    select(start);
+
+    // badges: count what's in each list once it has rendered
+    const count = (sel) => dash.querySelectorAll(sel).length;
+    const setBadge = (id, n) => { $('badge-' + id).textContent = n > 0 ? (n > 99 ? '99+' : n) : ''; };
+    const syncBadges = () => {
+      const goingTxt = [...dash.querySelectorAll('#dashStats .stat')].map(s => s.textContent);
+      setBadge('pitches', parseInt((goingTxt[2] || '').match(/\d+/)) || 0);
+      setBadge('pings', parseInt((goingTxt[3] || '').match(/\d+/)) || 0);
+      setBadge('whosin', parseInt((goingTxt[1] || '').match(/\d+/)) || 0);
+    };
+    new MutationObserver(syncBadges).observe(dash, { childList: true, subtree: true });
+    syncBadges();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Datenschutz · A Place About Falling</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1c1b19">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<!-- ✏️ TEMPLATE: written in good faith, not legal advice. Have it checked before relying on it. -->
+<style>
+  @font-face { font-family: 'Bungee'; src: url('bungee.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+  :root { --char: #1c1b19; --char-2: #262420; --line: #3f3b34; --yellow: #fcba01; --cream: #fff8e6; --muted: #b4ad9f; --dim: #8b8579;
+    --sans: 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--char); color: var(--cream); font-family: var(--sans); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 28px 20px 70px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 26px; }
+  .back { color: var(--muted); font-weight: 700; font-size: 14px; text-decoration: none; }
+  .lang { display: flex; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .lang button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 800; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--yellow); color: var(--char); }
+  h1 { font-family: 'Bungee', var(--sans); font-weight: 400; font-size: clamp(30px, 8vw, 42px); line-height: 1.05; margin: 0 0 8px; }
+  h2 { font-family: 'Bungee', var(--sans); font-weight: 400; font-size: 18px; margin: 30px 0 8px; color: var(--yellow); }
+  p, li { color: #e4ddcd; line-height: 1.6; font-size: 15px; }
+  ul { padding-left: 20px; }
+  .card { background: var(--char-2); border-radius: 16px; padding: 16px 18px; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .card p { margin: 0; }
+  a { color: var(--yellow); }
+  .muted { color: var(--dim); font-size: 13px; }
+  [data-l] { display: none; }
+  html[lang="de"] [data-l="de"], html[lang="en"] [data-l="en"] { display: block; }
+  html[lang="de"] span[data-l="de"], html[lang="en"] span[data-l="en"] { display: inline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" id="back" href="./"><span data-l="de">‹ Zurück</span><span data-l="en">‹ Back</span></a>
+    <div class="lang" role="group" aria-label="Sprache / Language">
+      <button type="button" data-set="de" aria-pressed="true">DE</button>
+      <button type="button" data-set="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <h1><span data-l="de">Datenschutz</span><span data-l="en">Privacy</span></h1>
+  <p class="muted"><span data-l="de">Kurz und ehrlich. Stand: Oktober 2026.</span><span data-l="en">Short and honest. As of October 2026.</span></p>
+
+  <h2><span data-l="de">Wer verantwortlich ist</span><span data-l="en">Who is responsible</span></h2>
+  <div class="card">
+    <p id="whoKnown" hidden><b id="whoName"></b><br><a id="whoMail" href="#"></a></p>
+    <p id="whoUnknown"><span data-l="de">Die Person, deren Seite du gerade besuchst. Ihr Name und ihre E-Mail stehen hier, sobald du diese Seite über ihren Link öffnest.</span><span data-l="en">The person whose page you're visiting. Their name and email show up here when you open this page from their link.</span></p>
+  </div>
+  <div data-l="de"><p>Jede Seite von „A Place About Falling" gehört einer einzelnen Person. Was du dort einträgst, geht <b>nur an sie</b>: direkt in eine Google-Tabelle in ihrem eigenen Google-Konto. Die Seitendateien (dieses HTML) liefert GitHub Pages aus. Wer diese Dateien bereitstellt, steht im <a href="rechtliches.html#impressum">Impressum</a>. Diese Stelle bekommt deine Eingaben nicht.</p></div>
+  <div data-l="en"><p>Every "A Place About Falling" page belongs to one person. What you enter there goes <b>only to them</b>: straight into a Google Sheet in their own Google account. The page files (this HTML) are served by GitHub Pages. Who provides those files is listed in the <a href="rechtliches.html#impressum">imprint</a>. They don't receive what you enter.</p></div>
+
+  <h2><span data-l="de">Was gespeichert wird</span><span data-l="en">What gets stored</span></h2>
+  <div data-l="de"><ul>
+    <li><b>Bei einer Session mitkommen:</b> Vorname und E-Mail. Damit bekommst du die Kalendereinladung, und die Person weiß, wer kommt. Auf der Seite erscheint nur dein Vorname. Gelöscht 30 Tage nach der Session.</li>
+    <li><b>Einen Tag vorschlagen:</b> Vorname, E-Mail, Halle, Tag und deine Notiz. Damit dir die Person antworten kann. Gelöscht nach 6 Monaten.</li>
+    <li><b>Ping-Liste:</b> deine E-Mail, erst nach Bestätigung per Link (Double-Opt-in). Bleibt, bis du dich abmeldest (Link in jeder Mail). Unbestätigte oder abgemeldete Einträge werden nach 30 Tagen gelöscht.</li>
+    <li><b>Frei/beschäftigt:</b> Die Seite zeigt nur, ob die Person morgens, mittags oder abends schon etwas vorhat. Nie was, wo oder mit wem.</li>
+  </ul>
+  <p>Die Daten liegen bei Google (Google Ireland Ltd.), weil die Person dafür ihr Google-Konto nutzt. Rechtsgrundlage ist deine Einwilligung bzw. deine Anfrage (Art. 6 Abs. 1 lit. a und b DSGVO).</p></div>
+  <div data-l="en"><ul>
+    <li><b>Joining a session:</b> first name and email. So you get the calendar invite and the person knows who's coming. Only your first name appears on the page. Deleted 30 days after the session.</li>
+    <li><b>Pitching a day:</b> first name, email, gym, day and your note. So the person can reply. Deleted after 6 months.</li>
+    <li><b>Ping list:</b> your email, only after you confirm via link (double opt-in). Kept until you unsubscribe (link in every email). Unconfirmed or unsubscribed entries are deleted after 30 days.</li>
+    <li><b>Free/busy:</b> the page only shows whether the person's morning, afternoon or evening is taken. Never what, where or with whom.</li>
+  </ul>
+  <p>The data is stored with Google (Google Ireland Ltd.), because the person uses their Google account for it. Legal basis: your consent or your request (Art. 6(1)(a) and (b) GDPR).</p></div>
+
+  <h2><span data-l="de">Auf deinem Gerät</span><span data-l="en">On your device</span></h2>
+  <div data-l="de"><p>Die Seite merkt sich im Speicher deines Browsers deinen Namen und deine E-Mail (damit du sie nicht jedes Mal eintippst) und bei welchen Sessions du dabei bist. Das bleibt auf deinem Gerät. Keine Cookies, kein Tracking, keine Analyse, keine Schriften von Google.</p></div>
+  <div data-l="en"><p>The page remembers your name and email in your browser's storage (so you don't retype them) and which sessions you joined. That stays on your device. No cookies, no tracking, no analytics, no fonts from Google.</p></div>
+
+  <h2><span data-l="de">Server-Logs</span><span data-l="en">Server logs</span></h2>
+  <div data-l="de"><p>Beim Aufruf der Seitendateien verarbeitet GitHub technisch nötige Daten wie deine IP-Adresse. Beim Laden der Sessions verbindet sich dein Browser mit Google (script.google.com). Details: <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub</a>, <a href="https://policies.google.com/privacy?hl=de" target="_blank" rel="noopener">Google</a>.</p></div>
+  <div data-l="en"><p>When the page files load, GitHub processes technically necessary data such as your IP address. When the sessions load, your browser connects to Google (script.google.com). Details: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub</a>, <a href="https://policies.google.com/privacy?hl=en" target="_blank" rel="noopener">Google</a>.</p></div>
+
+  <h2><span data-l="de">Deine Rechte</span><span data-l="en">Your rights</span></h2>
+  <div data-l="de"><p>Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen und Einwilligungen widerrufen. Schreib dazu einfach der verantwortlichen Person (oben). Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p></div>
+  <div data-l="en"><p>You can ask for access, correction or deletion at any time and withdraw consent. Just write to the responsible person (above). You can also complain to a data protection authority.</p></div>
+</div>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  function setLang(l) {
+    html.lang = l;
+    document.querySelectorAll('[data-set]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.set === l)); });
+    try { localStorage.setItem('apaf:lang', l); } catch (e) {}
+  }
+  var saved = null; try { saved = localStorage.getItem('apaf:lang'); } catch (e) {}
+  setLang(saved || ((navigator.language || '').slice(0, 2) === 'de' ? 'de' : 'en'));
+  document.querySelectorAll('[data-set]').forEach(function (b) { b.onclick = function () { setLang(b.dataset.set); }; });
+
+  // whose page? the same ?c= as on the page itself
+  var c = (new URLSearchParams(location.search).get('c') || '').trim();
+  if (c) document.getElementById('back').href = './?c=' + encodeURIComponent(c);
+  function show(contact) {
+    if (!contact || !contact.email) return;
+    document.getElementById('whoUnknown').hidden = true;
+    document.getElementById('whoKnown').hidden = false;
+    document.getElementById('whoName').textContent = contact.name || '';
+    var a = document.getElementById('whoMail');
+    a.textContent = contact.email; a.href = 'mailto:' + contact.email;
+  }
+  if (c === 'demo') show({ name: 'Max Mustermann', email: 'max@example.com' });
+  else if (/^[\w-]{20,}$/.test(c)) {
+    fetch('https://script.google.com/macros/s/' + c + '/exec?action=feed', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { show(d && d.profile && d.profile.contact); })
+      .catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

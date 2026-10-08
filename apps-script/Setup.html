@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --char: #1c1b19; --char-2: #2a2824; --line: #e3dccb; --yellow: #fcba01; --yellow-deep: #b98700;
+    --cream: #fff8e6; --ink: #1c1b19; --muted: #6b6458; --ok: #1a8f4c; --bad: #b3261e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 Arial, Helvetica, sans-serif; color: var(--ink); background: var(--cream); }
+  .wrap { padding: 16px 16px 90px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13px; letter-spacing: 0.02em; }
+  .logo i { width: 28px; height: 28px; border-radius: 8px; background: var(--yellow); display: grid; place-items: center;
+    font-style: normal; font-size: 16px; transform: rotate(-4deg); }
+  .lang { display: flex; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line); padding: 2px; }
+  .lang button { border: 0; background: none; font: inherit; font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+  .lang button[aria-pressed="true"] { background: var(--char); color: var(--cream); }
+  .dots { display: flex; gap: 5px; margin: 0 0 14px; }
+  .dots i { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+  .dots i.on { background: var(--yellow); }
+  h1 { font-size: 20px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p.lead { margin: 0 0 16px; color: var(--muted); }
+  label { display: block; font-weight: 700; font-size: 13px; margin: 14px 0 5px; }
+  label small { font-weight: 400; color: var(--muted); }
+  input[type=text], input[type=email], input[type=url], select, textarea {
+    width: 100%; font: inherit; padding: 9px 10px; border-radius: 9px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--yellow-deep); }
+  textarea { resize: vertical; min-height: 60px; }
+  .hint { font-size: 12px; color: var(--muted); margin: 5px 0 0; }
+  .box { background: #fff; border-radius: 12px; padding: 12px; box-shadow: inset 0 0 0 1.5px var(--line); margin: 12px 0; }
+  .box.tip { background: #fff3cc; box-shadow: none; }
+  .check { display: flex; gap: 9px; align-items: flex-start; padding: 6px 0; font-weight: 400; margin: 0; cursor: pointer; }
+  .check input { margin: 2px 0 0; width: 16px; height: 16px; accent-color: var(--char); flex: none; }
+  .check small { display: block; color: var(--muted); font-size: 12px; }
+  .city { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 2px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; cursor: pointer; font: inherit; font-weight: 800;
+    padding: 10px 14px; border-radius: 10px; background: var(--yellow); color: var(--char); box-shadow: 0 3px 0 var(--yellow-deep); text-decoration: none; }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--yellow-deep); }
+  .btn.ghost { background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); }
+  .btn.small { padding: 7px 10px; font-size: 12.5px; }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 12px 16px; background: var(--cream);
+    box-shadow: 0 -1px 0 var(--line); }
+  .nav .btn { flex: 1; }
+  .err { color: var(--bad); font-weight: 700; font-size: 13px; margin: 10px 0 0; min-height: 1em; }
+  ol.steps { padding: 0; margin: 10px 0; list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 12px 34px; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--char); color: var(--yellow); font-weight: 800; font-size: 12px; display: grid; place-items: center; }
+  ol.steps b { background: #fff3cc; padding: 0 4px; border-radius: 4px; }
+  .linkbox { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+  .linkbox input { flex: 1 1 100%; font-size: 12px; }
+  .linkbox .btn { flex: 1; }
+  .ticket { background: var(--yellow); border-radius: 14px; padding: 14px; text-align: center; margin: 12px 0; }
+  .ticket .t { font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+  .ticket svg { width: 190px; height: 190px; display: block; margin: 0 auto; border-radius: 8px; }
+  .secret { background: var(--char); color: var(--cream); border-radius: 12px; padding: 12px; margin: 12px 0; }
+  .secret label { color: var(--yellow); margin-top: 0; }
+  .secret .hint { color: #c9c3b5; }
+  .health { list-style: none; padding: 0; margin: 8px 0 0; }
+  .health li { padding: 4px 0; font-size: 13px; }
+  .health .ok { color: var(--ok); font-weight: 800; } .health .no { color: var(--bad); font-weight: 800; }
+  .hidden { display: none !important; }
+  .loading { padding: 40px 0; text-align: center; color: var(--muted); }
+  .bigchoice { display: grid; gap: 10px; margin-top: 20px; }
+  .bigchoice .btn { padding: 16px; font-size: 16px; }
+  details { margin-top: 10px; } summary { cursor: pointer; font-weight: 700; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><i>🧗</i>A Place About Falling</div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="de" aria-pressed="false">DE</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+  <div class="dots" id="dots"></div>
+  <main id="main"><div class="loading" data-t="loading"></div></main>
+</div>
+<div class="nav hidden" id="nav">
+  <button type="button" class="btn ghost" id="back"></button>
+  <button type="button" class="btn" id="next"></button>
+</div>
+
+<script>
+/* ───────── texts ───────── */
+var T = {
+  de: {
+    loading: 'Einen Moment…', back: '‹ Zurück', next: 'Weiter ›', save: 'Speichern & weiter', check: 'Prüfen',
+    hello: 'Hallo! 👋', helloLead: 'In ca. 5 Minuten hast du deine eigene Boulder-Seite. Du musst nichts programmieren, nur ein paar Fragen beantworten.',
+    pickLang: 'Welche Sprache magst du?',
+    s1: 'Über dich', s1Lead: 'Das steht oben auf deiner Seite.',
+    name: 'Dein Vorname', title: 'Überschrift', titleHint: 'Darf gern frech sein.', intro: 'Ein Satz über dich', introPh: 'Ich hänge fast jeden Tag an der Wand. Bring Schuhe mit.',
+    contact: 'Kontakt für die Datenschutz-Hinweise', contactHint: 'Wird auf deiner Seite unter „Datenschutz" angezeigt. Das ist Pflicht, sobald andere dort ihre E-Mail eintragen.',
+    contactName: 'Vor- und Nachname', contactEmail: 'E-Mail',
+    s2: 'Dein Boulder-Kalender', s2Lead: 'Alles, was in diesem Kalender steht, erscheint als Session auf deiner Seite. Nimm am besten einen eigenen Kalender nur fürs Bouldern.',
+    pickCal: 'Kalender auswählen', newCal: '+ Neuen Kalender „Bouldern" anlegen', creating: 'Lege an…', created: 'Angelegt ✓',
+    calTip: 'So trägst du Sessions ein: Termin in diesem Kalender anlegen. <b>Ort</b> = die Halle (z. B. „Superblock, Fichtenstraße 53"). <b>Titel</b> = kleine Notiz auf der Karte (z. B. „Montagsgruppe"). Wiederholungen funktionieren.',
+    s3: 'Wann bist du beschäftigt?', s3Lead: 'Für „Pitch me a session": Wer dir einen Tag vorschlägt, sieht, ob du morgens, mittags oder abends schon was vorhast. Nie was, wo oder mit wem.',
+    busyTip: 'Ganztägige Termine mit Wörtern wie „Urlaub", „krank" oder „Reise" blockieren den ganzen Tag.',
+    noApi: 'Hinweis: Der Google-Kalender-Dienst ist in diesem Skript nicht aktiv, ganztägige Termine werden dann nicht erkannt. Sag der Person Bescheid, von der du die Vorlage hast.',
+    s4: 'Deine Hallen', s4Lead: 'Diese Hallen kann man auf deiner Seite auswählen.',
+    addGym: 'Eigene Halle hinzufügen', gymName: 'Name', gymAddr: 'Adresse', gymCity: 'Stadt', add: 'Hinzufügen', own: 'Eigene',
+    s5: 'Extras', s5Lead: 'Alles hier ist freiwillig.',
+    hangout: 'Link zu deiner Hangout-Einladung', hangoutHint: 'Falls du auch eine Einladung für Essen/Drinks/Sport hast. Sonst leer lassen.',
+    notify: 'Benachrichtigungen an', notifyHint: 'Hierhin kommen Mails, wenn jemand mitkommt oder dir einen Tag vorschlägt.',
+    saving: 'Speichere… (beim ersten Mal ca. 10 Sekunden)',
+    s6: 'Seite veröffentlichen', s6Lead: 'Jetzt noch einmal auf „Bereitstellen" klicken. Das ist der einzige Schritt, den Google nicht automatisch erlaubt.',
+    openEditor: 'Apps Script öffnen ↗',
+    dep1: 'Klick auf <b>Apps Script öffnen</b> (oben). Es öffnet sich ein neuer Tab.',
+    dep2: 'Rechts oben auf den blauen Button <b>Bereitstellen</b> → <b>Neue Bereitstellung</b>.',
+    dep3: 'Links beim Zahnrad ⚙ neben „Typ auswählen" → <b>Web-App</b>.',
+    dep4: '„Ausführen als": <b>Ich</b>. „Wer hat Zugriff": <b>Jeder</b>. (Ganz wichtig, sonst sieht niemand deine Seite.)',
+    dep5: '<b>Bereitstellen</b> klicken. Falls Google nochmal fragt: erlauben.',
+    dep6: 'Die <b>Web-App-URL</b> kopieren (endet auf /exec) und hier einfügen:',
+    depPh: 'https://script.google.com/macros/s/…/exec',
+    checking: 'Prüfe…',
+    eFormat: 'Das sieht nicht nach der Web-App-URL aus. Sie beginnt mit https://script.google.com/macros/s/ und endet auf /exec.',
+    eAccess: 'Die Seite ist noch nicht für alle offen. Bei „Wer hat Zugriff" muss <b>Jeder</b> stehen. Bereitstellen → Bereitstellungen verwalten → Stift → ändern → Bereitstellen.',
+    eUnreach: 'Google hat nicht geantwortet. Kurz warten und nochmal prüfen.',
+    s7: 'Fertig! 🎉', s7Lead: 'Deine Seite ist online.',
+    pubLink: 'Dein öffentlicher Link', pubHint: 'Den kannst du überall teilen.',
+    qrT: 'Zum Scannen in der Halle',
+    adminLink: 'Dein Admin-Link', adminHint: 'NUR für dich. Damit checkst du in der Halle ein und siehst dein Dashboard. Wie ein Passwort behandeln.',
+    copy: 'Kopieren', copied: 'Kopiert ✓', open: 'Öffnen ↗', mailMe: 'Links an mich mailen', mailed: 'Gesendet ✓',
+    health: 'Kurzer Check', hCalendar: 'Kalender gefunden', hSessions: 'Sessions in den nächsten 3 Wochen', hFreebusy: 'Frei/beschäftigt-Prüfung', hTrigger: 'Tägliche Mails an Abonnenten', hDeployed: 'Veröffentlicht',
+    change: 'Einstellungen ändern', newKey: 'Neues Admin-Wort', newKeyQ: 'Alte Admin-Links funktionieren dann nicht mehr. Sicher?',
+    eName: 'Bitte deinen Vornamen eintragen.', eCalendar: 'Bitte einen Kalender auswählen.', eContact: 'Bitte eine gültige E-Mail für die Datenschutz-Hinweise angeben.', eGyms: 'Bitte mindestens eine Halle auswählen.', eGeneric: 'Hat nicht geklappt: ',
+    privacyNote: 'Deine Daten (Anmeldungen, Vorschläge, Abonnenten) landen in Tabs dieser Tabelle. Nur in deinem Google-Konto.'
+  },
+  en: {
+    loading: 'One moment…', back: '‹ Back', next: 'Next ›', save: 'Save & continue', check: 'Check',
+    hello: 'Hi there! 👋', helloLead: 'In about 5 minutes you\'ll have your own bouldering page. No coding, just a few questions.',
+    pickLang: 'Which language do you prefer?',
+    s1: 'About you', s1Lead: 'This goes at the top of your page.',
+    name: 'Your first name', title: 'Headline', titleHint: 'Cheeky is welcome.', intro: 'One line about you', introPh: 'I\'m at the wall most days anyway. Bring shoes.',
+    contact: 'Contact for the privacy notice', contactHint: 'Shown on your page under "Privacy". Required as soon as other people enter their email there.',
+    contactName: 'Full name', contactEmail: 'Email',
+    s2: 'Your bouldering calendar', s2Lead: 'Everything in this calendar shows up as a session on your page. Best use a calendar just for bouldering.',
+    pickCal: 'Pick a calendar', newCal: '+ Create a new "Bouldering" calendar', creating: 'Creating…', created: 'Created ✓',
+    calTip: 'Adding sessions: create an event in this calendar. <b>Location</b> = the gym (e.g. "Superblock, Fichtenstraße 53"). <b>Title</b> = a small note on the card (e.g. "Monday crew"). Repeating events work.',
+    s3: 'When are you busy?', s3Lead: 'For "Pitch me a session": people suggesting a day see whether your morning, afternoon or evening is taken. Never what, where or with whom.',
+    busyTip: 'All-day events with words like "vacation", "sick" or "trip" block the whole day.',
+    noApi: 'Note: the Google Calendar service isn\'t enabled in this script, so all-day events won\'t be detected. Tell whoever gave you the template.',
+    s4: 'Your gyms', s4Lead: 'People can pick these gyms on your page.',
+    addGym: 'Add your own gym', gymName: 'Name', gymAddr: 'Address', gymCity: 'City', add: 'Add', own: 'Your own',
+    s5: 'Extras', s5Lead: 'Everything here is optional.',
+    hangout: 'Link to your hangout invite', hangoutHint: 'If you also have an invite for food/drinks/sport. Otherwise leave empty.',
+    notify: 'Send notifications to', notifyHint: 'Emails about people joining or pitching you a day go here.',
+    saving: 'Saving… (about 10 seconds the first time)',
+    s6: 'Publish your page', s6Lead: 'One more click on "Deploy". It\'s the only step Google won\'t let a script do by itself.',
+    openEditor: 'Open Apps Script ↗',
+    dep1: 'Click <b>Open Apps Script</b> (above). A new tab opens.',
+    dep2: 'Top right, the blue <b>Deploy</b> button → <b>New deployment</b>.',
+    dep3: 'On the left, the gear ⚙ next to "Select type" → <b>Web app</b>.',
+    dep4: '"Execute as": <b>Me</b>. "Who has access": <b>Anyone</b>. (Important, otherwise nobody can see your page.)',
+    dep5: 'Click <b>Deploy</b>. If Google asks again: allow.',
+    dep6: 'Copy the <b>Web app URL</b> (ends in /exec) and paste it here:',
+    depPh: 'https://script.google.com/macros/s/…/exec',
+    checking: 'Checking…',
+    eFormat: 'That doesn\'t look like the web app URL. It starts with https://script.google.com/macros/s/ and ends in /exec.',
+    eAccess: 'The page isn\'t open to everyone yet. "Who has access" must be <b>Anyone</b>. Deploy → Manage deployments → pencil → change → Deploy.',
+    eUnreach: 'Google didn\'t answer. Wait a moment and check again.',
+    s7: 'Done! 🎉', s7Lead: 'Your page is live.',
+    pubLink: 'Your public link', pubHint: 'Share this one everywhere.',
+    qrT: 'For scanning at the gym',
+    adminLink: 'Your admin link', adminHint: 'ONLY for you. It lets you check in at the gym and see your dashboard. Treat it like a password.',
+    copy: 'Copy', copied: 'Copied ✓', open: 'Open ↗', mailMe: 'Email me these links', mailed: 'Sent ✓',
+    health: 'Quick check', hCalendar: 'Calendar found', hSessions: 'Sessions in the next 3 weeks', hFreebusy: 'Free/busy check', hTrigger: 'Daily emails to subscribers', hDeployed: 'Published',
+    change: 'Change settings', newKey: 'New admin word', newKeyQ: 'Old admin links will stop working. Sure?',
+    eName: 'Please enter your first name.', eCalendar: 'Please pick a calendar.', eContact: 'Please enter a valid email for the privacy notice.', eGyms: 'Please pick at least one gym.', eGeneric: 'That didn\'t work: ',
+    privacyNote: 'Your data (sign-ups, pitches, subscribers) is stored in tabs of this sheet. Only in your Google account.'
+  }
+};
+
+/* ───────── QR (same encoder as the page) ───────── */
+/* ═══════════════════════════════════════════════════════════════
+   QR — tiny QR code maker (byte mode, error correction "M"), no
+   outside library, nothing loaded from anywhere. Structure follows
+   Project Nayuki's QR Code generator (MIT).
+   QR.svg(text, { dark, light, quiet }) → '<svg …>' string
+   ═══════════════════════════════════════════════════════════════ */
+const QR = (() => {
+  // level M: ECC codewords per block and number of blocks, by version 1–40
+  const ECC = [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28];
+  const BLOCKS = [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49];
+  const FORMAT_M = 0;
+
+  const rawModules = v => {
+    let r = (16 * v + 128) * v + 64;
+    if (v >= 2) { const n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; }
+    return r;
+  };
+  const dataCodewords = v => Math.floor(rawModules(v) / 8) - ECC[v] * BLOCKS[v];
+
+  const gfMul = (x, y) => {
+    let z = 0;
+    for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11d); z ^= ((y >>> i) & 1) * x; }
+    return z;
+  };
+  function rsDivisor(degree) {
+    const r = new Array(degree).fill(0); r[degree - 1] = 1;
+    let root = 1;
+    for (let i = 0; i < degree; i++) {
+      for (let j = 0; j < r.length; j++) { r[j] = gfMul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; }
+      root = gfMul(root, 0x02);
+    }
+    return r;
+  }
+  function rsRemainder(data, div) {
+    const r = div.map(() => 0);
+    for (const b of data) {
+      const f = b ^ r.shift(); r.push(0);
+      div.forEach((c, i) => { r[i] ^= gfMul(c, f); });
+    }
+    return r;
+  }
+
+  function encode(text) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let ver = 1;
+    for (; ver <= 40; ver++) {
+      const cc = ver <= 9 ? 8 : 16;
+      if (4 + cc + bytes.length * 8 <= dataCodewords(ver) * 8) break;
+    }
+    if (ver > 40) throw new Error('QR: text too long');
+    const bits = [];
+    const put = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+    put(0b0100, 4); put(bytes.length, ver <= 9 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    const cap = dataCodewords(ver) * 8;
+    put(0, Math.min(4, cap - bits.length));
+    put(0, (8 - bits.length % 8) % 8);
+    for (let pad = 0xec; bits.length < cap; pad ^= 0xec ^ 0x11) put(pad, 8);
+    const data = [];
+    for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+
+    // split into blocks, add error correction, interleave
+    const nb = BLOCKS[ver], ecl = ECC[ver], raw = Math.floor(rawModules(ver) / 8);
+    const nShort = nb - raw % nb, shortLen = Math.floor(raw / nb), div = rsDivisor(ecl), blocks = [];
+    for (let i = 0, k = 0; i < nb; i++) {
+      const dat = data.slice(k, k + shortLen - ecl + (i < nShort ? 0 : 1)); k += dat.length;
+      const ecc = rsRemainder(dat, div);
+      if (i < nShort) dat.push(0);
+      blocks.push(dat.concat(ecc));
+    }
+    const all = [];
+    for (let i = 0; i < blocks[0].length; i++) blocks.forEach((b, j) => { if (i !== shortLen - ecl || j >= nShort) all.push(b[i]); });
+    return { ver, codewords: all };
+  }
+
+  function matrix(text) {
+    const { ver, codewords } = encode(text);
+    const size = ver * 4 + 17;
+    const mod = Array.from({ length: size }, () => new Array(size).fill(false));
+    const fn = Array.from({ length: size }, () => new Array(size).fill(false));
+    const set = (x, y, dark) => { mod[y][x] = dark; fn[y][x] = true; };
+
+    for (let i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    const finder = (cx, cy) => {
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy));
+        if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4);
+      }
+    };
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    if (ver > 1) {
+      const n = Math.floor(ver / 7) + 2;
+      const step = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (n * 2 - 2)) * 2;
+      const pos = [6];
+      for (let p = size - 7; pos.length < n; p -= step) pos.splice(1, 0, p);
+      pos.forEach((a, i) => pos.forEach((b, j) => {
+        if ((i === 0 && j === 0) || (i === 0 && j === n - 1) || (i === n - 1 && j === 0)) return;
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(a + dx, b + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }));
+    }
+    const format = mask => {
+      const d = FORMAT_M << 3 | mask;
+      let r = d;
+      for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+      const b = (d << 10 | r) ^ 0x5412, bit = i => ((b >>> i) & 1) === 1;
+      for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+      set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+      for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+      for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+      for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+      set(8, size - 8, true);
+    };
+    format(0);   // reserve the format areas before placing data
+    if (ver >= 7) {
+      let r = ver;
+      for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1f25);
+      const b = ver << 12 | r;
+      for (let i = 0; i < 18; i++) {
+        const dark = ((b >>> i) & 1) === 1, a = size - 11 + i % 3, c = Math.floor(i / 3);
+        set(a, c, dark); set(c, a, dark);
+      }
+    }
+
+    // data, zigzag from the bottom right
+    let i = 0;
+    for (let right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (let v = 0; v < size; v++) for (let j = 0; j < 2; j++) {
+        const x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - v : v;
+        if (!fn[y][x] && i < codewords.length * 8) { mod[y][x] = ((codewords[i >>> 3] >>> (7 - (i & 7))) & 1) === 1; i++; }
+      }
+    }
+
+    const MASKS = [
+      (x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, (x, y) => x % 3 === 0, (x, y) => (x + y) % 3 === 0,
+      (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => x * y % 2 + x * y % 3 === 0,
+      (x, y) => (x * y % 2 + x * y % 3) % 2 === 0, (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0
+    ];
+    const applyMask = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!fn[y][x] && MASKS[m](x, y)) mod[y][x] = !mod[y][x]; };
+
+    // pick the mask with the lowest penalty (makes it easier to scan)
+    const penalty = () => {
+      let p = 0, dark = 0;
+      const line = get => {
+        let run = 1;
+        for (let k = 1; k <= size; k++) {
+          if (k < size && get(k) === get(k - 1)) run++;
+          else { if (run >= 5) p += run - 2; run = 1; }
+        }
+        for (let k = 0; k + 6 < size; k++) {
+          if (get(k) && !get(k + 1) && get(k + 2) && get(k + 3) && get(k + 4) && !get(k + 5) && get(k + 6)) {
+            const light = (a, b) => { for (let q = a; q < b; q++) if (q >= 0 && q < size && get(q)) return false; return true; };
+            if (light(k - 4, k) || light(k + 7, k + 11)) p += 40;
+          }
+        }
+      };
+      for (let y = 0; y < size; y++) line(x => mod[y][x]);
+      for (let x = 0; x < size; x++) line(y => mod[y][x]);
+      for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++) {
+        const c = mod[y][x];
+        if (c === mod[y][x + 1] && c === mod[y + 1][x] && c === mod[y + 1][x + 1]) p += 3;
+      }
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (mod[y][x]) dark++;
+      return p + Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10;
+    };
+    let best = 0, bestP = Infinity;
+    for (let m = 0; m < 8; m++) {
+      applyMask(m); format(m);
+      const p = penalty();
+      if (p < bestP) { bestP = p; best = m; }
+      applyMask(m);
+    }
+    applyMask(best); format(best);
+    return mod;
+  }
+
+  function svg(text, o = {}) {
+    const m = matrix(text), q = o.quiet ?? 4, n = m.length + q * 2;
+    let d = '';
+    m.forEach((row, y) => row.forEach((on, x) => { if (on) d += `M${x + q} ${y + q}h1v1h-1z`; }));
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" role="img" aria-label="QR code">` +
+      `<rect width="${n}" height="${n}" fill="${o.light || '#fff'}"/><path d="${d}" fill="${o.dark || '#000'}"/></svg>`;
+  }
+  return { svg, matrix };
+})();
+
+
+/* ───────── state ───────── */
+var START = '<?= start ?>';
+var S = null, lang = 'de', step = 0, form = null;
+var STEPS = ['hello', 's1', 's2', 's3', 's4', 's5', 's6', 's7'];
+function t(k) { return (T[lang] && T[lang][k]) || T.en[k] || k; }
+function $(id) { return document.getElementById(id); }
+function h(tag, attrs, html) { var e = document.createElement(tag); for (var k in (attrs || {})) e.setAttribute(k, attrs[k]); if (html != null) e.innerHTML = html; return e; }
+function escH(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function run(fn, args, ok, fail) {
+  var r = google.script.run.withSuccessHandler(ok).withFailureHandler(fail || function (e) { alert(t('eGeneric') + (e && e.message)); });
+  r[fn].apply(r, args || []);
+}
+
+function setLangUi(l) {
+  lang = l;
+  document.querySelectorAll('[data-lang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.lang === lang)); });
+  document.documentElement.lang = lang;
+}
+document.querySelectorAll('[data-lang]').forEach(function (b) {
+  b.onclick = function () { setLangUi(b.dataset.lang); run('setLang', [lang], function () {}); draw(); };
+});
+
+run('getSetupState', [], function (state) {
+  S = state;
+  setLangUi(S.lang || ((navigator.language || '').slice(0, 2) === 'en' ? 'en' : 'de'));
+  var sv = S.saved || {};
+  form = {
+    hostName: sv.hostName || '', title: sv.title || 'Where my skin goes to die', intro: sv.intro || '',
+    contactName: sv.contactName || '', contactEmail: sv.contactEmail || S.email,
+    calendarId: sv.calendarId || '',
+    availabilityCalendarIds: sv.availabilityCalendarIds || ['primary'],
+    gyms: sv.gyms && sv.gyms.length ? sv.gyms : [],
+    hangoutUrl: sv.hangoutUrl || '', notifyEmail: sv.notifyEmail || S.email
+  };
+  if (START === 'links' && S.deploymentId) step = 7;
+  else if (S.hasSettings && !S.deploymentId) step = 6;
+  else if (S.deploymentId) step = 7;
+  else step = S.lang ? 1 : 0;
+  draw();
+});
+
+/* ───────── drawing ───────── */
+function draw() {
+  var main = $('main'); main.innerHTML = '';
+  var dots = $('dots'); dots.innerHTML = '';
+  for (var i = 1; i < STEPS.length; i++) dots.appendChild(h('i', { class: i <= step ? 'on' : '' }));
+  dots.classList.toggle('hidden', step === 0);
+  ({ 0: stepHello, 1: stepAbout, 2: stepCal, 3: stepBusy, 4: stepGyms, 5: stepExtras, 6: stepPublish, 7: stepDone })[step](main);
+}
+function nav(backFn, nextLabel, nextFn) {
+  var n = $('nav'); n.classList.remove('hidden');
+  $('back').textContent = t('back'); $('back').classList.toggle('hidden', !backFn); $('back').onclick = backFn;
+  $('next').textContent = nextLabel; $('next').disabled = false; $('next').onclick = nextFn; $('next').classList.toggle('hidden', !nextFn);
+  if (!backFn && !nextFn) n.classList.add('hidden');
+}
+function go(n) { step = n; draw(); window.scrollTo(0, 0); }
+function head(main, title, lead) { main.appendChild(h('h1', null, escH(t(title)))); if (lead) main.appendChild(h('p', { class: 'lead' }, t(lead))); }
+function field(main, key, label, type, opts) {
+  opts = opts || {};
+  var l = h('label', { for: 'f_' + key }, escH(t(label)) + (opts.optional ? ' <small>(' + (lang === 'de' ? 'optional' : 'optional') + ')</small>' : ''));
+  var i = type === 'textarea' ? h('textarea', { id: 'f_' + key }) : h('input', { id: 'f_' + key, type: type || 'text' });
+  i.value = form[key] || ''; if (opts.ph) i.placeholder = t(opts.ph);
+  i.oninput = function () { form[key] = i.value; };
+  main.appendChild(l); main.appendChild(i);
+  if (opts.hint) main.appendChild(h('p', { class: 'hint' }, t(opts.hint)));
+  return i;
+}
+function errBox(main) { var e = h('div', { class: 'err', id: 'err' }); main.appendChild(e); return e; }
+
+function stepHello(main) {
+  head(main, 'hello', 'helloLead');
+  main.appendChild(h('p', null, '<b>' + escH(T.de.pickLang) + '</b><br><span style="color:var(--muted)">' + escH(T.en.pickLang) + '</span>'));
+  var c = h('div', { class: 'bigchoice' });
+  [['de', '🇩🇪  Deutsch'], ['en', '🇬🇧  English']].forEach(function (x) {
+    var b = h('button', { class: 'btn', type: 'button' }, x[1]);
+    b.onclick = function () { setLangUi(x[0]); run('setLang', [x[0]], function () {}); go(1); };
+    c.appendChild(b);
+  });
+  main.appendChild(c);
+  nav(null, '', null);
+}
+
+function stepAbout(main) {
+  head(main, 's1', 's1Lead');
+  field(main, 'hostName', 'name');
+  field(main, 'title', 'title', 'text', { hint: 'titleHint' });
+  field(main, 'intro', 'intro', 'textarea', { ph: 'introPh', optional: true });
+  var b = h('div', { class: 'box' });
+  b.appendChild(h('p', { class: 'hint', style: 'margin:0 0 4px' }, '<b style="color:var(--ink)">' + escH(t('contact')) + '</b><br>' + escH(t('contactHint'))));
+  field(b, 'contactName', 'contactName');
+  field(b, 'contactEmail', 'contactEmail', 'email');
+  main.appendChild(b);
+  var e = errBox(main);
+  nav(S.lang ? null : function () { go(0); }, t('next'), function () {
+    if (!form.hostName.trim()) { e.textContent = t('eName'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) { e.textContent = t('eContact'); return; }
+    go(2);
+  });
+}
+
+function stepCal(main) {
+  head(main, 's2', 's2Lead');
+  main.appendChild(h('label', { for: 'cal' }, escH(t('pickCal'))));
+  var sel = h('select', { id: 'cal' });
+  sel.appendChild(h('option', { value: '' }, '—'));
+  S.calendars.filter(function (c) { return c.owned; }).forEach(function (c) {
+    var o = h('option', { value: c.id }, escH(c.name + (c.primary ? (lang === 'de' ? ' (Hauptkalender)' : ' (main calendar)') : '')));
+    if (c.id === form.calendarId) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = function () { form.calendarId = sel.value; };
+  main.appendChild(sel);
+  var nb = h('button', { class: 'btn ghost small', type: 'button', style: 'margin-top:10px' }, escH(t('newCal')));
+  nb.onclick = function () {
+    nb.disabled = true; nb.textContent = t('creating');
+    run('createBoulderCalendar', [lang === 'de' ? 'Bouldern' : 'Bouldering'], function (c) {
+      S.calendars.push({ id: c.id, name: c.name, owned: true, primary: false });
+      form.calendarId = c.id; draw();
+    }, function (err) { nb.disabled = false; nb.textContent = t('newCal'); alert(t('eGeneric') + err.message); });
+  };
+  main.appendChild(nb);
+  main.appendChild(h('div', { class: 'box tip' }, t('calTip')));
+  var e = errBox(main);
+  nav(function () { go(1); }, t('next'), function () { if (!form.calendarId) { e.textContent = t('eCalendar'); return; } go(3); });
+}
+
+function stepBusy(main) {
+  head(main, 's3', 's3Lead');
+  var b = h('div', { class: 'box' });
+  S.calendars.forEach(function (c) {
+    var id = c.primary ? 'primary' : c.id;
+    var on = form.availabilityCalendarIds.indexOf(id) !== -1 || (c.primary && form.availabilityCalendarIds.indexOf(c.id) !== -1);
+    var l = h('label', { class: 'check' });
+    var i = h('input', { type: 'checkbox' }); i.checked = on;
+    i.onchange = function () {
+      form.availabilityCalendarIds = form.availabilityCalendarIds.filter(function (x) { return x !== id && x !== c.id; });
+      if (i.checked) form.availabilityCalendarIds.push(id);
+    };
+    l.appendChild(i);
+    l.appendChild(h('span', null, escH(c.name) + (c.primary ? '<small>' + (lang === 'de' ? 'Hauptkalender' : 'main calendar') + '</small>' : '')));
+    b.appendChild(l);
+  });
+  main.appendChild(b);
+  main.appendChild(h('p', { class: 'hint' }, escH(t('busyTip'))));
+  if (!S.calendarApi) main.appendChild(h('div', { class: 'box tip' }, escH(t('noApi'))));
+  nav(function () { go(2); }, t('next'), function () { go(4); });
+}
+
+function stepGyms(main) {
+  head(main, 's4', 's4Lead');
+  // merge: defaults + already chosen own gyms
+  var chosen = {}; form.gyms.forEach(function (g) { g.gyms.forEach(function (x) { chosen[x.name] = x; }); });
+  var groups = JSON.parse(JSON.stringify(S.defaultGyms));
+  var known = {}; groups.forEach(function (g) { g.gyms.forEach(function (x) { known[x.name] = 1; }); });
+  form.gyms.forEach(function (g) { g.gyms.forEach(function (x) {
+    if (known[x.name]) return;
+    var grp = groups.filter(function (q) { return q.location === g.location; })[0];
+    if (!grp) { grp = { location: g.location, gyms: [] }; groups.push(grp); }
+    grp.gyms.push(x); known[x.name] = 1;
+  }); });
+  var b = h('div', { class: 'box' });
+  var boxes = [];
+  groups.forEach(function (g) {
+    b.appendChild(h('div', { class: 'city' }, escH(g.location)));
+    g.gyms.forEach(function (x) {
+      var l = h('label', { class: 'check' });
+      var i = h('input', { type: 'checkbox' }); i.checked = !!chosen[x.name];
+      boxes.push({ i: i, g: g.location, x: x });
+      l.appendChild(i); l.appendChild(h('span', null, escH(x.name) + '<small>' + escH(x.address) + '</small>'));
+      b.appendChild(l);
+    });
+  });
+  main.appendChild(b);
+  var collect = function () {
+    var out = [];
+    boxes.forEach(function (o) { if (!o.i.checked) return;
+      var grp = out.filter(function (q) { return q.location === o.g; })[0];
+      if (!grp) { grp = { location: o.g, gyms: [] }; out.push(grp); }
+      grp.gyms.push(o.x);
+    });
+    form.gyms = out;
+  };
+  var d = h('details'); d.appendChild(h('summary', null, escH(t('addGym'))));
+  var nm = h('input', { type: 'text', placeholder: t('gymName') }), ad = h('input', { type: 'text', placeholder: t('gymAddr') }), ct = h('input', { type: 'text', placeholder: t('gymCity') });
+  [nm, ad, ct].forEach(function (i) { i.style.marginTop = '6px'; d.appendChild(i); });
+  var ab = h('button', { class: 'btn small', type: 'button', style: 'margin-top:8px' }, escH(t('add')));
+  ab.onclick = function () {
+    if (!nm.value.trim()) return;
+    collect();
+    var loc = ct.value.trim() || t('own');
+    var grp = form.gyms.filter(function (q) { return q.location === loc; })[0];
+    if (!grp) { grp = { location: loc, gyms: [] }; form.gyms.push(grp); }
+    grp.gyms.push({ name: nm.value.trim(), address: ad.value.trim() });
+    draw();
+  };
+  d.appendChild(ab); main.appendChild(d);
+  var e = errBox(main);
+  nav(function () { collect(); go(3); }, t('next'), function () { collect(); if (!form.gyms.length) { e.textContent = t('eGyms'); return; } go(5); });
+}
+
+function stepExtras(main) {
+  head(main, 's5', 's5Lead');
+  field(main, 'hangoutUrl', 'hangout', 'url', { hint: 'hangoutHint', optional: true });
+  field(main, 'notifyEmail', 'notify', 'email', { hint: 'notifyHint' });
+  main.appendChild(h('p', { class: 'hint', style: 'margin-top:16px' }, '🔒 ' + escH(t('privacyNote'))));
+  var e = errBox(main);
+  nav(function () { go(4); }, t('save'), function () {
+    var btn = $('next'); btn.disabled = true; btn.textContent = t('saving');
+    run('saveSettings', [form], function (state) { S = state; go(S.deploymentId ? 7 : 6); }, function (err) {
+      btn.disabled = false; btn.textContent = t('save');
+      var m = { name: 'eName', calendar: 'eCalendar', contact: 'eContact', gyms: 'eGyms' }[err.message];
+      e.innerHTML = m ? escH(t(m)) : escH(t('eGeneric') + err.message);
+    });
+  });
+}
+
+function stepPublish(main) {
+  head(main, 's6', 's6Lead');
+  var a = h('a', { class: 'btn', href: S.editorUrl, target: '_blank', rel: 'noopener' }, escH(t('openEditor')));
+  main.appendChild(a);
+  var ol = h('ol', { class: 'steps' });
+  ['dep1', 'dep2', 'dep3', 'dep4', 'dep5', 'dep6'].forEach(function (k) { ol.appendChild(h('li', null, t(k))); });
+  main.appendChild(ol);
+  var i = h('input', { type: 'url', id: 'depUrl', placeholder: t('depPh') });
+  if (S.deployHint) i.value = S.deployHint;
+  main.appendChild(i);
+  var e = errBox(main);
+  nav(function () { go(5); }, t('check'), function () {
+    var btn = $('next'); btn.disabled = true; btn.textContent = t('checking'); e.textContent = '';
+    run('saveDeployment', [i.value], function (r) {
+      btn.disabled = false; btn.textContent = t('check');
+      if (!r.ok) { e.innerHTML = t({ format: 'eFormat', access: 'eAccess', unreachable: 'eUnreach' }[r.error] || 'eUnreach'); return; }
+      S.links = r.links; S.deploymentId = true; go(7);
+    }, function (err) { btn.disabled = false; btn.textContent = t('check'); e.textContent = t('eGeneric') + err.message; });
+  });
+}
+
+function copyBox(main, value) {
+  var row = h('div', { class: 'linkbox' });
+  var i = h('input', { type: 'text', readonly: 'readonly' }); i.value = value;
+  var c = h('button', { class: 'btn small', type: 'button' }, escH(t('copy')));
+  c.onclick = function () {
+    i.select(); var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    if (!ok && navigator.clipboard) navigator.clipboard.writeText(value);
+    c.textContent = t('copied'); setTimeout(function () { c.textContent = t('copy'); }, 1500);
+  };
+  var o = h('a', { class: 'btn ghost small', href: value, target: '_blank', rel: 'noopener' }, escH(t('open')));
+  row.appendChild(i); row.appendChild(c); row.appendChild(o);
+  main.appendChild(row);
+}
+
+function stepDone(main) {
+  head(main, 's7', 's7Lead');
+  var L = S.links;
+  if (!L) { go(6); return; }
+  main.appendChild(h('label', null, escH(t('pubLink')) + ' <small>' + escH(t('pubHint')) + '</small>'));
+  copyBox(main, L.page);
+  var tk = h('div', { class: 'ticket' });
+  tk.appendChild(h('div', { class: 't' }, escH(t('qrT'))));
+  tk.insertAdjacentHTML('beforeend', QR.svg(L.page, { dark: '#1c1b19', light: '#fcba01', quiet: 2 }));
+  main.appendChild(tk);
+  var sec = h('div', { class: 'secret' });
+  sec.appendChild(h('label', null, '🔑 ' + escH(t('adminLink'))));
+  sec.appendChild(h('p', { class: 'hint', style: 'margin:0 0 4px' }, escH(t('adminHint'))));
+  copyBox(sec, L.admin);
+  main.appendChild(sec);
+  var mb = h('button', { class: 'btn ghost', type: 'button', style: 'width:100%' }, '✉️ ' + escH(t('mailMe')));
+  mb.onclick = function () { mb.disabled = true; run('emailMyLinks', [lang], function () { mb.textContent = t('mailed'); }); };
+  main.appendChild(mb);
+
+  var hb = h('div', { class: 'box' }); hb.appendChild(h('b', null, escH(t('health'))));
+  var ul = h('ul', { class: 'health' }, '<li>…</li>'); hb.appendChild(ul); main.appendChild(hb);
+  run('checkHealth', [], function (list) {
+    ul.innerHTML = '';
+    var names = { calendar: 'hCalendar', sessions: 'hSessions', freebusy: 'hFreebusy', trigger: 'hTrigger', deployed: 'hDeployed' };
+    list.forEach(function (x) {
+      ul.appendChild(h('li', null, '<span class="' + (x.ok ? 'ok' : 'no') + '">' + (x.ok ? '✓' : '✗') + '</span> ' + escH(t(names[x.k])) + (x.info ? ': <b>' + escH(x.info) + '</b>' : '')));
+    });
+  });
+
+  var row = h('div', { class: 'row', style: 'margin-top:12px' });
+  var ch = h('button', { class: 'btn ghost small', type: 'button' }, escH(t('change')));
+  ch.onclick = function () { go(1); };
+  var nk = h('button', { class: 'btn ghost small', type: 'button' }, escH(t('newKey')));
+  nk.onclick = function () { if (!confirm(t('newKeyQ'))) return; run('newAdminKey', [], function (l) { S.links = l; draw(); }); };
+  row.appendChild(ch); row.appendChild(nk); main.appendChild(row);
+  nav(null, '', null);
+}
+</script>
+</body>
+</html>
